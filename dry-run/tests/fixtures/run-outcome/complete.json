@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "workflow": "dry-run",
+  "item": "EXAMPLE-101",
+  "status": "complete",
+  "finishedAt": "2000-01-01T10:00:00Z",
+  "commit": "1111111111111111111111111111111111111111",
+  "branch": "agent/example-101",
+  "failure": null,
+  "intervention": null,
+  "facts": [
+    {
+      "id": "day-padding",
+      "subject": "the legacy date formatter",
+      "fact": "pads a single-digit day with a zero",
+      "evidence": ["src/legacy/format-date.ext:40"]
+    },
+    {
+      "id": "export-encoding",
+      "subject": "the nightly export",
+      "fact": "is written as UTF-8 without a byte-order mark",
+      "evidence": ["src/legacy/export.ext", "confirmed by opening one export in a hex viewer"]
+    }
+  ],
+  "corrections": [
+    {
+      "id": "day-padding-is-a-space",
+      "subject": "the legacy date formatter",
+      "fact": "pads a single-digit day with a space, not a zero",
+      "stage": "research",
+      "asset": "reference-page",
+      "supersedes": "day-padding",
+      "retracts": null,
+      "evidence": ["src/legacy/format-date.ext:42", "https://example.invalid/reviews/101#comment-3"]
+    }
+  ],
+  "decisions": [
+    { "kind": "empty-input", "choice": "return an empty string", "reason": "the legacy behaviour, and two callers depend on it" }
+  ],
+  "undecided": []
+}

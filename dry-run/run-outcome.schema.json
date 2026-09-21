@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Run outcome record",
+  "description": "One record per work item, written on EVERY terminal path (complete, failed and blocked alike) after the run's last push, so the commit it names exists. The writer and every reader share this one file. A change to it is a `schemaVersion` bump and never a silent edit: a reader refuses a version it does not know. kit 3.3-2 · ADAPT: everything about the record's content is yours (its fields, its evidence forms, its status vocabulary); what must survive is the version field, a record on every terminal path, corrections as additions, and the `stage` and `asset` of every correction. The reader understands the subset of JSON Schema this file uses (type, enum, const, required, properties, additionalProperties, items, pattern, minLength, anyOf, $ref into $defs) and nothing else; widen `tools/outcomes/record.ts` before you use another keyword here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "workflow", "item", "status", "finishedAt", "commit", "branch", "failure", "intervention", "facts", "corrections", "decisions", "undecided"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "workflow": { "type": "string", "minLength": 1, "description": "The workflow that ran: dry-run." },
+    "item": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$", "description": "The work item. The record's file is `<item>.json`, and the reader holds the two equal." },
+    "status": { "enum": ["complete", "failed", "blocked"], "description": "The terminal path the run took. Which other fields are set follows from this one; the cross-field rules are in record.ts because a schema cannot state them." },
+    "finishedAt": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$", "description": "When the run reached its terminal path, UTC. A record may carry a clock; a report derived from records never prints one." },
+    "commit": { "type": ["string", "null"], "pattern": "^[0-9a-f]{40}$", "description": "The last commit the run pushed. Required when complete; null, together with `branch`, when the run pushed nothing." },
+    "branch": { "type": ["string", "null"], "minLength": 1, "description": "The branch that commit is on. Null together with `commit`." },
+    "failure": {
+      "description": "Set when, and only when, status is `failed`.",
+      "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/failure" }]
+    },
+    "intervention": {
+      "description": "Set when, and only when, status is `blocked`: the run stopped to ask a person.",
+      "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/intervention" }]
+    },
+    "facts": { "type": "array", "items": { "$ref": "#/$defs/fact" }, "description": "What the run established and relied on. Never edited after the fact: a fact found wrong is superseded or retracted by an entry in `corrections`, and the record keeps both for the audit." },
+    "corrections": { "type": "array", "items": { "$ref": "#/$defs/correction" }, "description": "Additions, in the order they were made. Each either adds, supersedes an earlier entry (by id) with a new fact, or retracts one and states no fact." },
+    "decisions": { "type": "array", "items": { "$ref": "#/$defs/decision" }, "description": "Decisions of a kind other runs also make. The reports compare them across items to find the same kind of decision made two ways." },
+    "undecided": { "type": "array", "items": { "$ref": "#/$defs/undecided" }, "description": "What the run could not decide, and why." }
+  },
+  "$defs": {
+    "evidence": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "Each entry is one of: a source line (`path/to/file.ext:NN`), a path, a URL, or prose. The filing step classes each and checks a source line against the commit this record names." },
+    "stage": {
+      "description": "kit 3.3-6 · ADAPT: the STAGE of your workflow that produced a correction. This vocabulary is a placeholder: replace it with your workflow's own stages before the first record is written. Once a record exists, a change here is a `schemaVersion` bump like any other.",
+      "enum": ["research", "build", "review", "environment", "reference"]
+    },
+    "asset": {
+      "description": "kit 3.3-6 · ADAPT: the ASSET that would absorb a correction so the next run does not meet it. A placeholder vocabulary, yours to replace on the same terms as `stage`; keep `none`, which means nothing durable would have prevented it, and which the proposal list skips.",
+      "enum": ["reference-page", "policy-constant", "test-oracle", "convention-pin", "none"]
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage", "reason"],
+      "properties": {
+        "stage": { "$ref": "#/$defs/stage" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "intervention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reasonCode", "detail"],
+      "properties": {
+        "reasonCode": {
+          "description": "kit 2.2-3 · ADAPT: the EXHAUSTIVE list of reasons a run may stop to ask a person: the same codes, in the same order, as block `intervention`, key `codes` of `dry-run/workflow-policy.json`, which flags the list exhaustive, so a blocked run cannot record an unlisted reason. A starting vocabulary; change it in both files in one change (`npm run outcomes:selftest` holds the two lists equal wherever the policy file is present).",
+          "enum": ["SOURCE_CONFLICT", "OUT_OF_SCOPE_MUTATION", "REQUIRED_SERVER_UNAVAILABLE", "HOST_PREREQUISITES_INCOMPLETE"]
+        },
+        "detail": { "type": "string", "minLength": 1 }
+      }
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "subject", "fact", "evidence"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "subject": { "type": "string", "minLength": 1, "description": "What the fact is about, as the reference would name it." },
+        "fact": { "type": "string", "minLength": 1 },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "correction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "subject", "fact", "stage", "asset", "supersedes", "retracts", "evidence"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "subject": { "type": "string", "minLength": 1 },
+        "fact": { "type": ["string", "null"], "minLength": 1, "description": "The fact as it should have been known. Null exactly when this entry retracts." },
+        "stage": { "$ref": "#/$defs/stage" },
+        "asset": { "$ref": "#/$defs/asset" },
+        "supersedes": { "type": ["string", "null"], "description": "The id of an EARLIER fact or correction in this record that this one replaces." },
+        "retracts": { "type": ["string", "null"], "description": "The id of an EARLIER fact or correction in this record that this one withdraws." },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "choice", "reason"],
+      "properties": {
+        "kind": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$", "description": "The kind of decision, spelled the same way by every run that makes it." },
+        "choice": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "undecided": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["question", "why"],
+      "properties": {
+        "question": { "type": "string", "minLength": 1 },
+        "why": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

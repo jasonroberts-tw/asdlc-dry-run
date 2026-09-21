@@ -1,0 +1,65 @@
+{
+  "describes": "Every constant a tool or a prompt of the dry-run workflow reads. One block per concern; each block carries its constants and, beside them, `reason` (why the value is what it is), `sourceEvidence` (the run, measurement or document that decided it) and `setOn` (the date it was decided). A tool reads a value by block and key; a prompt cites the block and the key and states no second number.",
+  "whyThisFileExists": "A threshold, a file name or a reason code stated anywhere else is a copy of one of these, and the copy is the one that goes stale. A JSON file cannot carry a header comment, so these keys answer, before the data, the questions a reader asks of it.",
+  "gatedBy": "npm run dry-run:test. dry-run/tests/policy.test.mjs holds every block to the reason / sourceEvidence / setOn shape, pins every value (so a change here is made twice, deliberately), keeps every retired key absent, resolves every block-and-key citation a prompt makes, and refuses a prompt that names a constant or a reason code this file does not hold.",
+  "whatItDoesNOTDo": "It holds no procedure and no rule about how a run proceeds (the contract page and its lifecycle reference do), no rule about what the written change looks like (the implementation skill does), and no fact another team owns. It is never written by a tool: a person edits it, through a pull request.",
+  "provenance": "Laid down by the starter kit with the kit's starting values, each marked as such in its `sourceEvidence`. ADAPT: replace a starting value, and its evidence and date with it, the first time a run of yours gives you a reason to; then update the pin in dry-run/tests/policy.test.mjs in the same change.",
+
+  "intervention": {
+    "exhaustive": true,
+    "exhaustiveMeans": "`codes` is the WHOLE list of reasons a run may stop and ask a person. A run that wants to ask for a reason not listed does not ask: it records a failure. The record schema's intervention field takes this same list as its enum, so a blocked run cannot record an unlisted reason; adding a code is one change to this list, the record schema and the pin in the policy test.",
+    "codes": [
+      {
+        "code": "SOURCE_CONFLICT",
+        "firesWhen": "Two inputs disagree and the source-authority ladder on the contract page leaves the conflict open.",
+        "anAnswer": "Resumes the phase that raised it. The answer is recorded as the latest explicit human clarification, which the ladder puts on top."
+      },
+      {
+        "code": "OUT_OF_SCOPE_MUTATION",
+        "firesWhen": "A step needs an operation the one mutation-scope approval did not name.",
+        "anAnswer": "Approves or declines that one operation, recorded beside the original scope. Approved, the run resumes; declined, it ends blocked, with its record."
+      },
+      {
+        "code": "REQUIRED_SERVER_UNAVAILABLE",
+        "firesWhen": "The first cheap read against an external server the workflow's README declares REQUIRED fails.",
+        "anAnswer": "The person reconnects and says so. The run repeats the read and resumes; the wait is recorded. An OPTIONAL server that is absent never fires this: its absence is recorded and the run continues."
+      },
+      {
+        "code": "HOST_PREREQUISITES_INCOMPLETE",
+        "firesWhen": "The prerequisite check reports one or more failed checks before the run starts.",
+        "anAnswer": "The person applies the remedies the report names and restarts. Every failed check is named in ONE stop and recorded in one entry, never one stop per check."
+      }
+    ],
+    "reason": "A supervised run that asks at every step is driven, not supervised, and one that never asks ships a guess. An exhaustive list is what makes both ends checkable, and what makes the reasons countable across records.",
+    "sourceEvidence": "The kit's starting list. Each code is one stop the kit's own bullets name: an open source conflict, an operation outside the approval, a required server that does not answer, and the aggregated prerequisite stop. No run of yours has exercised them yet.",
+    "setOn": "2026-09-20"
+  },
+
+  "hostFacts": {
+    "file": "host-facts.json",
+    "fileMeans": "The name of the one environment-facts file under the run directory. Every dispatch passes its PATH and never restates its contents; dry-run/tools/Write-CeHostFacts.ps1 writes it and dry-run/tools/Test-CeHostFacts.ps1 validates it against dry-run/host-facts.schema.json.",
+    "runDirectoryEnvironmentVariable": "WORKFLOW_RUN_DIRECTORY",
+    "runDirectoryEnvironmentVariableMeans": "When set, names the run directory, and the writer uses it instead of deriving one beneath the target checkout. A launcher sets it on its own process so every child inherits it.",
+    "reason": "Facts a run measures once are read by path. Restated in a dispatch they are paid for on every dispatch, and any two copies can disagree.",
+    "sourceEvidence": "The catalogue this kit was extracted from: a prior run's report showed that every dispatch prompt restated the environment, and five parallel workers paid for it five times.",
+    "setOn": "2026-09-20"
+  },
+
+  "entrySkill": {
+    "maxLines": 120,
+    "maxLinesMeans": "The entry skill's line cap, held by dry-run/tests/entry-skill.test.mjs. The entry skill holds only what the contract leaves to its host, so the cap is kept tight enough that it cannot grow a procedure.",
+    "reason": "A second copy of the lifecycle starts as a few helpful lines in the file a person opens first.",
+    "sourceEvidence": "The kit's starting value: the figure the catalogue this kit was extracted from uses for its own entry skill. Not yet measured against yours.",
+    "setOn": "2026-09-20"
+  },
+
+  "tests": {
+    "perTestTimeoutSeconds": 60,
+    "perTestTimeoutSecondsMeans": "How long dry-run/tests/run-tests.mjs lets one validator run before killing it and counting it failed.",
+    "concurrency": 4,
+    "concurrencyMeans": "How many validators the runner has running at once.",
+    "reason": "A hung validator must fail the gate rather than hold it, and validators are independent processes that gain from running side by side.",
+    "sourceEvidence": "The kit's starting values, chosen with headroom over the one validator that starts a second shell. Re-measure on your slowest host and replace both.",
+    "setOn": "2026-09-20"
+  }
+}

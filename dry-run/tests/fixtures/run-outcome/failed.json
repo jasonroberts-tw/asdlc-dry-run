@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "workflow": "dry-run",
+  "item": "EXAMPLE-102",
+  "status": "failed",
+  "finishedAt": "2000-01-02T10:00:00Z",
+  "commit": null,
+  "branch": null,
+  "failure": {
+    "stage": "build",
+    "reason": "the module's tests could not be made to pass within the attempts the policy file allows"
+  },
+  "intervention": null,
+  "facts": [],
+  "corrections": [
+    {
+      "id": "formatter-reads-host-locale",
+      "subject": "the legacy date formatter",
+      "fact": "reads the operating system locale rather than the one the run was given",
+      "stage": "research",
+      "asset": "reference-page",
+      "supersedes": null,
+      "retracts": null,
+      "evidence": ["src/legacy/format-date.ext:57"]
+    }
+  ],
+  "decisions": [
+    { "kind": "empty-input", "choice": "throw", "reason": "the target framework's own formatter throws, and the plan preferred its conventions" }
+  ],
+  "undecided": []
+}

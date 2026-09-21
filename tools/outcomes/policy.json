@@ -1,0 +1,25 @@
+{
+  "describes": "Every constant the learning loop reads: the sample size below which a report prints no rate, the labels the filing step puts on a proposal, the files that ARE the committed reference, and the one list of generic words the deduplication step treats as a mention rather than a description.",
+  "whyThisFileExists": "A threshold stated in a tool and again in a prompt is two numbers, and the copy is the one that goes stale. The report emitter, the filing step and their selftest read these keys and state none of them inline.",
+  "gatedBy": "npm run outcomes:selftest (the shape of this file, and that the generic-word list the report side reads is the one the filing side reads); npm run outcomes:check (a report built from a different value no longer matches what is committed).",
+  "whatItDoesNOTDo": "It does not decide what is promoted. Nothing here filters a proposal out of a person's sight: a strong match is PRINTED with where it matched, and everything else is filed. It does not hold the workflow's own constants; those are in dry-run/workflow-policy.json.",
+  "provenance": "kit 3.4 · ADAPT: written from the pattern catalogue's bullets, with no run of yours behind any value. Replace each value the first time your own records argue for another, and put the date and the evidence in its `Means` sibling.",
+
+  "minimumSampleSize": 5,
+  "minimumSampleSizeMeans": "A rate (a share of records, as a percentage) is printed only when at least this many records stand behind it; below it the reports print the counts and say the rate is withheld. Two runs that both met one problem are a 100% rate and no evidence. Five is a floor chosen before any run existed; raise it when your first misleading rate teaches you what it should be. Changed here and nowhere else.",
+
+  "proposalLabelPrefix": "proposal:",
+  "proposalLabelPrefixMeans": "The idempotency key of a filed proposal is the LABEL `<this prefix><first 16 hex digits of sha256(subject, fact)>`, never the title: a title is reworded by whoever triages it, and a closed issue keeps its labels, so a promoted or rejected proposal is found again and never re-filed. Changing the prefix orphans every key already filed; do not.",
+
+  "proposalLabels": ["outcome-proposal", "repo:<repository>"],
+  "proposalLabelsMeans": "Labels every filed proposal carries beside its key, so a person can list them all. The second is the where-the-work-lands label the tracker gate of part 1 requires on every open issue: replace `<repository>` with this repository's name. The filing step refuses to file while any entry still carries an angle-bracketed placeholder, and `--dry-run` says so without failing.",
+
+  "referencePaths": [],
+  "referencePathsMeans": "The committed reference the proposals target, as repository-relative files or directories (a directory is read recursively): a skill, a document, a configuration file. While this list is empty there is no reference to check against, every proposal's disposition is `absent`, and both the reports and the filing step say so. Name only hand-maintained source here, never generated output: a proposal is promoted by editing the source.",
+
+  "genericWords": ["a", "an", "and", "as", "at", "by", "for", "from", "in", "is", "it", "of", "on", "or", "the", "to", "with"],
+  "genericWordsMeans": "Words that do not count as describing a subject. The deduplication step looks for a proposal's subject in the reference, and for the fact's own words near it: a passage that shares only these words with the fact MENTIONS the subject in passing (a weak match, filed with that disposition) and one that shares others DESCRIBES it (a strong match, printed and not filed). Seeded with function words only; add the words your own subject makes generic (the ones every page of your reference uses) the first time a weak match is wrongly printed as strong. ONE list: `already-named.ts` reads it for the report emitter and the filing step alike, and the selftest holds the two to the same verdicts.",
+
+  "strongMatchSharedWords": 3,
+  "strongMatchSharedWordsMeans": "How many distinct non-generic words of the fact must appear in the same passage as the subject for the match to be strong. Three, chosen before any run; lower it if promoted facts are being re-filed, raise it if unrelated passages are printed as strong."
+}

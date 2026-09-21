@@ -1,0 +1,19 @@
+# if on Windows, copy lefthook-windows.yml to lefthook-local.yml to fix the pre-push hook.
+#
+# `parallel: false` is the one workaround evilmartians/lefthook#1256 records: with `parallel: true`
+# lefthook's jobs all finish and lefthook never returns (the pre-commit note in lefthook.yml has the
+# symptoms and the kill procedure). The cost is that the suite runs one job at a time, which is why
+# every pre-push job is scoped to its inputs and runs with no npm or tsx launcher.
+#
+# UNTESTED ALTERNATIVE. The hang looks like the interactive spinner, and lefthook
+# 2.1.11 changed its PTY handling, so with lefthook >= 2.1.12 the experiment is:
+#
+#     no_tty: true
+#     pre-push:
+#       parallel: true
+#
+# It needs a real terminal (Windows Terminal + pwsh); Claude's Bash tool has no tty, so the hang never
+# reproduces there and no agent session can settle it. If lefthook hangs after the jobs finish, come
+# back to the two lines below.
+pre-push:
+  parallel: false

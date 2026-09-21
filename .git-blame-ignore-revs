@@ -1,0 +1,30 @@
+# Commits that changed formatting and nothing else. `git blame` should skip them.
+#
+# Turn it on locally (git does not read this file by default):
+#
+#     git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# GitHub reads it without any configuration.
+#
+# Add one full 40-character SHA per line, with a comment above it saying what the commit did. A SHA
+# belongs here ONLY if the commit is formatting and nothing else — see below for why that matters.
+
+# ---------------------------------------------------------------------------------------------------
+# The 2026-08-21 Prettier reformat is deliberately NOT listed here. Do not add it.
+#
+# The plan for that change asked for the reformat to be its own commit so that its SHA
+# could go in this file. That did not happen: the 118-file reformat and the whole lint-and-gates
+# change landed together as one commit, which was pushed before the
+# split. Rewriting published history was considered and declined.
+#
+# `blame.ignoreRevsFile` works per COMMIT, not per file, so listing that SHA would skip it everywhere.
+# For the 118 files whose diff really is pure formatting that is exactly right. For the 13 files where
+# the same commit made real changes -- a generator's modules, two runtime files, tsconfig.json,
+# package.json and the configs -- blame would fall through to the commit BEFORE those lines existed. Attributing a
+# real change to a commit that predates it is worse than noise: it is
+# confidently wrong, and the generator is precisely where blame gets used.
+#
+# The cost of leaving it out, measured: 3,477 of the 38,144 lines in those 118 files (9%) are attributed
+# to that commit. `git blame -w` recovers 23 of them, so it is not a workaround. `git log --follow` and
+# `git log -S<string>` are unaffected and remain the better tools for tracing a line's real history.
+# ---------------------------------------------------------------------------------------------------

@@ -1,0 +1,32 @@
+# Dependencies. The lockfile is authoritative; `npm ci` restores this directory.
+node_modules/
+
+# Worktrees the harness provisions live INSIDE the checkout, at the harness's own location. A
+# checkout inside the working tree carries its own .git, which the parent reads as a gitlink and
+# would commit as a phantom submodule. This rule is load-bearing. Do not remove it.
+.claude/worktrees/
+
+# The briefing a worktree renders for its own session; absent in the primary checkout, where the
+# `@.worktree/CONTEXT.md` import at the end of CLAUDE.md is harmless.
+.worktree/
+
+# Machine-specific harness permissions. The tracked .claude/settings.json holds plugins and hook
+# registrations and nothing else.
+.claude/settings.local.json
+
+# The dry-run workflow's run directories: one per work item, holding the facts file the
+# launcher writes and whatever else a run keeps between steps. Read by path, never committed.
+.dry-run/
+
+# The hook runner's per-machine override. On a platform where the runner hangs in parallel it is a
+# copy of lefthook-windows.yml, and committing it would switch parallel off for everyone else.
+lefthook-local.yml
+
+# Drafts passed to tools by file: commit messages, pull-request bodies, tracker notes. At the
+# checkout root, because the harness scratchpad can disappear mid-run and .git is a file, not a
+# directory, in a linked worktree.
+.scratch/
+
+# The starter kit's bootstrap state. Delete this entry with KIT-CHECKLIST.md once the checklist is
+# done.
+.kit/

@@ -1,0 +1,52 @@
+// Deliberately almost empty. Every part of the setup lives in Dockerfile / entrypoint.sh, so this
+// file only points at them -- no `features`, no `postCreateCommand`, nothing that has to resolve
+// over the network when a container is created. If you are about to add a setup step here, add a
+// layer to the Dockerfile instead.
+//
+// The exception is the mounts below, which cannot be anywhere else: a bind mount names a path on
+// YOUR machine, and an image is shared by everyone.
+{
+  "name": "Development container",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  // The image already runs as this user; naming it keeps the CLI from falling back to root and
+  // leaving root-owned files in a bind-mounted clone.
+  "remoteUser": "vscode",
+
+  // Your host logins, reused rather than repeated. These are the two things an image cannot bake,
+  // because they are yours and not the project's.
+  //
+  // `${localEnv:HOME}${localEnv:USERPROFILE}` is one path, not two: exactly one of the pair is set
+  // -- HOME on Linux and macOS, USERPROFILE on Windows -- so the empty one contributes nothing.
+  //
+  // If you have never run `claude` or `gh` on this machine, run each once first, or delete the
+  // mount you do not want: the daemon answers a bind mount whose source is missing by creating it,
+  // as an empty root-owned DIRECTORY, and `~/.claude.json` then exists as a directory where a file
+  // is expected. entrypoint.sh detects both cases and says so rather than letting them look like
+  // something else's bug.
+  //
+  // Read-write on purpose. Claude Code rewrites `.credentials.json` when its token refreshes, and a
+  // read-only mount would work until the token expired and then fail in a way nobody would connect
+  // to this line. The corollary is that container sessions share your host's Claude Code state --
+  // history, projects, plugins -- rather than keeping a second copy of it.
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude,target=/home/vscode/.claude,type=bind",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude.json,target=/home/vscode/.claude.json,type=bind",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.config/gh,target=/home/vscode/.config/gh,type=bind"
+  ],
+
+  "remoteEnv": {
+    // Windows keeps gh's config in %APPDATA%\GitHub CLI rather than ~/.config/gh, so on a Windows
+    // host the third mount above lands empty. `gh auth token > $env:GH_TOKEN` before launching VS
+    // Code covers that; an unset variable arrives empty and gh ignores it.
+    "GH_TOKEN": "${localEnv:GH_TOKEN}"
+  },
+
+  "customizations": {
+    "vscode": {
+      // Editor wiring for gates the repository already enforces -- not environment setup.
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode", "anthropic.claude-code"]
+    }
+  }
+}

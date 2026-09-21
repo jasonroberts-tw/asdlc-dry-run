@@ -1,0 +1,92 @@
+# Every gate, binding on every pull request and on every push to the trunk: the slowest tier of the
+# gate ladder (`CLAUDE.md` § The gate ladder), and the one that trusts none of the faster ones.
+#
+# kit 1.6-5 · ADAPT: keep the order CHEAPEST FIRST, so the commonest failure is also the quickest
+# answer. A step belongs here when its check reads only committed files; a check that reads
+# something outside the repository (another checkout, a token, a network, a language model) belongs
+# in neither this file nor the hook runner's, and a digest gate stands in for it. Delete this
+# paragraph when done.
+name: verify
+
+on:
+  pull_request:
+  push:
+    branches: ['main']
+
+# A newer run for the same ref supersedes an older one: cancel it rather than queue behind it.
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+# Minimal: every step below only reads the repository.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    # A hung step fails the run in minutes rather than holding a runner for the default six hours.
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+      - run: npm ci
+      # Milliseconds: three committed files held to each other.
+      - name: every job names a script, and every unjobbed script is declared
+        run: npm run check:jobs
+      - name: the job cross-check, negative-tested
+        run: npm run check:jobs:selftest
+      # Milliseconds: the count index held to the committed files its own second table names.
+      - name: every count in the index re-derives from its source
+        run: npm run counts:check
+      - name: the count-index gate, negative-tested
+        run: npm run counts:selftest
+      # Every tracked text file, no allowlist.
+      - name: every citation resolves
+        run: npm run citations:check
+      # The validators over the dry-run workflow's prompts: a prompt is a program with no
+      # compiler, and these are its type checks. Every validator runs here whatever the pre-push
+      # tier decided by measurement; the runner fails on an empty discovery, so this step cannot
+      # pass by finding nothing. The hosted image carries `pwsh`, so the two validators that need
+      # it run here rather than skip; on an image without it, install it.
+      - name: the dry-run runner refuses what it should, negative-tested
+        run: npm run dry-run:test:selftest
+      - name: the dry-run workflow's prompts hold their structure
+        run: npm run dry-run:test
+      # Committed fixtures and scratch copies of them; one scratch repository for the push question.
+      - name: the run-outcome record's validator and writer, negative-tested
+        run: npm run outcomes:record:selftest
+      # Every input is a committed file: the records, the one schema, the emitter.
+      - name: the learning loop's records are canonical and its reports are current
+        run: npm run outcomes:check
+      - name: the learning loop's emitter and filing step, negative-tested
+        run: npm run outcomes:selftest
+      # Milliseconds: the graph record held to the files it names, to the hook runner's
+      # configuration, to this file, to the prose page and to the tracker's formula.
+      - name: the graph record describes the repository
+        run: npm run pipeline:check
+      # A hash walk over each node's declared inputs; runs no generator, needs no sibling checkout.
+      - name: no stamped node is out of date with its declared inputs
+        run: npm run pipeline:stale:check
+      - name: the pipeline gates, negative-tested
+        run: npm run pipeline:selftest
+      # Milliseconds: the register's header held to its own headings.
+      - name: the register's header agrees with its entries
+        run: npm run check:register
+      - name: the register gate, negative-tested
+        run: npm run check:register:selftest
+      #
+      # DELIBERATELY ABSENT, each with its reason. Add to this list rather than deleting from it:
+      #   * the tracker's checks: they read the tracker's database, which a fresh clone does not have.
+      #   * the worktree hooks' selftest: about a hundred git spawns against a scratch repository it
+      #     builds; it is a pre-push job, and nothing it reads differs in CI.
+      #   * the learning loop's filing step (`outcomes:propose`): it reads and writes the tracker, so
+      #     it is a job in neither file; a person runs it, `--dry-run` first.
+      #
+      # A RETIRED STEP stays here as a comment saying why a restored step would be wrong, so the next
+      # person does not restore it:
+      #   * <name of the step> — <what it checked, the decision that retired it, and what would be
+      #     wrong about bringing it back>

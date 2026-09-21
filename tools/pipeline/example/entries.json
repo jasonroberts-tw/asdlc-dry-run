@@ -1,0 +1,9 @@
+{
+  "describes": "The worked example's one input: a hand-maintained list. Edit it, run `npm run pipeline:stale`, and X-EXAMPLE reports STALE by the name of this input group until `npm run pipeline:example` has run again.",
+  "entries": [
+    { "name": "invoicing", "state": "in-progress" },
+    { "name": "ledger", "state": "legacy" },
+    { "name": "reports", "state": "legacy" },
+    { "name": "sign-in", "state": "migrated" }
+  ]
+}

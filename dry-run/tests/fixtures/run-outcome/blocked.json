@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "workflow": "dry-run",
+  "item": "EXAMPLE-103",
+  "status": "blocked",
+  "finishedAt": "2000-01-03T10:00:00Z",
+  "commit": "3333333333333333333333333333333333333333",
+  "branch": "agent/example-103",
+  "failure": null,
+  "intervention": {
+    "reasonCode": "SOURCE_CONFLICT",
+    "detail": "the work item asks for the old rounding and its latest comment asks for the new one; neither input outranks the other"
+  },
+  "facts": [
+    {
+      "id": "rounding-mode",
+      "subject": "the totals column",
+      "fact": "rounds half away from zero",
+      "evidence": ["src/legacy/totals.ext:12"]
+    }
+  ],
+  "corrections": [
+    {
+      "id": "rounding-mode-withdrawn",
+      "subject": "the totals column",
+      "fact": null,
+      "stage": "review",
+      "asset": "none",
+      "supersedes": null,
+      "retracts": "rounding-mode",
+      "evidence": ["the line cited is in a test helper, not in the column's own code"]
+    }
+  ],
+  "decisions": [],
+  "undecided": [
+    { "question": "which rounding the totals column keeps", "why": "the inputs conflict and the conflict is a person's to settle" }
+  ]
+}

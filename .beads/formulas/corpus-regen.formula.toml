@@ -1,0 +1,124 @@
+# CORPUS-REGEN: re-run a root emitter and carry the change through everything downstream of it.
+#
+# kit 1.3-5 · ADAPT: keep this file only when you have a multi-step cycle worth templating, and
+# then replace its steps with yours. Delete it otherwise; nothing reads it until you pour it.
+#
+# This is a formula rather than "re-run the emitter" because of the cascade: a re-run that stops at
+# the root's own output leaves every artifact derived from it quietly describing an input that no
+# longer exists. A formula declares variables and dependent steps; an instance is poured from it for
+# one cycle and thrown away afterwards.
+#
+#   bd formula show corpus-regen
+#   bd mol wisp corpus-regen --var reason="<what moved>"
+#   bd mol squash <wisp-id>     # keep the run as a digest, if this cycle is worth remembering
+#   bd mol burn <wisp-id>       # discard it
+#
+# Vapor phase on purpose. The durable record of a regeneration is the commits and the closed issues,
+# not the checklist that got you there. `pour = true` is what makes an instance materialise all the
+# steps instead of only its root.
+#
+# TWO STANDING RULES FOR EDITING THIS FILE. **Cite headings, never line numbers**: a line pointer
+# rots on every edit above it. And **cite `CNT-*` keys from `count-index.md`, never
+# numerals**: a count hard-coded into a step title is exactly the drift the count index exists to
+# end.
+#
+# Prose lines are joined with a trailing \ so `bd show` wraps them itself. Command lines are not.
+
+formula = "corpus-regen"
+type = "workflow"
+phase = "vapor"
+pour = true
+version = 1
+description = """
+CORPUS REGEN. Trigger: {{reason}}.
+
+This cycle re-runs the root emitter and then every emitter that reads its output. It closes when \
+the generated artifacts, their checks and the issues that asked for the change all agree again.
+
+WHAT MUST NOT HAPPEN, in order of how expensive it is to discover late:
+
+* Stopping at the root's own output. That is what the cascade step is for.
+* Two regenerations at once. Run one.
+* Refreshing a baseline or a fixture instead of explaining each difference.
+* Editing generated output by hand to make a check pass. The correction goes into the \
+hand-maintained source, and the next run carries it.
+"""
+
+[vars.reason]
+description = "What triggered this cycle: the issue ids that ask for the change, or the input that moved."
+required = true
+
+# ---------------------------------------------------------------------------------------------
+
+[[steps]]
+id = "intake"
+title = "Intake: what is stale, and why"
+type = "task"
+priority = 2
+labels = ["corpus-regen"]
+description = """
+Trigger: {{reason}}.
+
+Name the scope before touching an emitter: which input moved, which issues ask for the change, and \
+which generated artifacts read that input, directly or through another artifact. Re-derive that \
+list from the emitters' declared inputs rather than from memory.
+
+Exit criterion: a written list of the artifacts this cycle will regenerate, in order.
+"""
+
+[[steps]]
+id = "regenerate-root"
+title = "Re-run the root emitter"
+type = "task"
+priority = 1
+labels = ["corpus-regen"]
+depends_on = ["intake"]
+description = """
+Run the root emitter by its public name, the bare script that writes the artifact, then its \
+`:check` twin, which must report no difference.
+
+Exit criterion: the root artifact regenerated, its check green, and every difference in it \
+explained by the trigger.
+"""
+
+[[steps]]
+id = "cascade"
+title = "Re-run every emitter downstream of the root, in dependency order"
+type = "task"
+priority = 1
+labels = ["corpus-regen"]
+depends_on = ["regenerate-root"]
+description = """
+For each artifact on the intake list, in order: run its emitter, then its `:check` twin. A \
+downstream difference nobody predicted at intake is a finding, not noise: explain it before going on.
+
+Exit criterion: every artifact on the list regenerated and every `:check` green.
+"""
+
+[[steps]]
+id = "gates"
+title = "Run the full gate suite, then rebase and run it again"
+type = "task"
+priority = 1
+labels = ["corpus-regen"]
+depends_on = ["cascade"]
+description = """
+  npm run gates
+
+Update any count the regeneration moved from what its check reports, never the reverse. Fetch, \
+rebase onto the trunk, and run the suite again.
+
+Exit criterion: two green runs, as measured, and one pull request holding the whole cycle.
+"""
+
+[[steps]]
+id = "close"
+title = "Close the issues that asked for this, each with a reason naming the pull request"
+type = "task"
+priority = 2
+labels = ["corpus-regen"]
+depends_on = ["gates"]
+description = """
+Close each triggering issue with a reason that names the pull request. Then squash or burn this \
+instance: the commits and the closed issues are the record.
+"""

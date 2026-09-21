@@ -1,0 +1,223 @@
+# The hook runner's configuration: the pre-commit and pre-push tiers of the gate ladder
+# (`CLAUDE.md` § The gate ladder). `.github/workflows/verify.yml` runs every gate again; a slower tier never trusts a
+# faster one.
+#
+# kit 1.6-3 · ADAPT: every cost note below that gives a figure was measured in the repository this
+# kit was extracted from, on its owner's host, and says so. Re-measure on yours (`time npm run
+# <name>`) and replace the note, naming the host: the same job costs several times more behind
+# endpoint security on native Windows than on Linux. Delete this paragraph when done.
+
+pre-commit:
+  # `parallel: false` IS DELIBERATE. With `parallel: true` the runner hangs on Windows after every
+  # job has finished: it never prints its summary or returns, and only killing the process helps
+  # (evilmartians/lefthook#1256, open; measured in the source repository on 2.1.10 from Windows
+  # Terminal with pwsh). Disabling parallel is the only workaround the issue records. Pre-commit
+  # cannot leave that to a local override file, because it would hang a bare `git commit` for
+  # everyone who has not copied one, and its jobs cost seconds in sequence.
+  parallel: false
+  jobs:
+    # Over STAGED paths only: one verifier per generator, chosen by path. A staged edit under the
+    # generated root is re-derived at commit time rather than discovered at push.
+    - name: generated-files-are-not-hand-edited
+      glob: 'artifacts/**'
+      run: node scripts/assert-not-hand-edited.mjs {staged_files}
+    # NO_COLOR on every job that runs a third-party CLI is load-bearing, not cosmetic: one tool
+    # probed the terminal's capabilities, exited without reading the answers, and left the
+    # terminal's replies in the shell's input queue, where the shell read them as typed commands.
+    #
+    # The tracker's own pre-commit hook, preserved. Without this job, installing the hook runner
+    # turns the issue tracker's git integration off without telling anyone.
+    - name: beads
+      env:
+        NO_COLOR: '1'
+      run: bd hooks run pre-commit
+
+# One job per git hook the tracker owns, for the same reason as the pre-commit one above.
+prepare-commit-msg:
+  jobs:
+    - name: beads
+      env:
+        NO_COLOR: '1'
+      run: bd hooks run prepare-commit-msg {1} {2} {3}
+
+post-checkout:
+  jobs:
+    - name: beads
+      env:
+        NO_COLOR: '1'
+      run: bd hooks run post-checkout {1} {2} {3}
+
+post-merge:
+  jobs:
+    - name: beads
+      env:
+        NO_COLOR: '1'
+      run: bd hooks run post-merge {1}
+
+pre-push:
+  # Parallel here, because these jobs take tens of seconds together and minutes in sequence. On a
+  # platform where the runner hangs in parallel, `lefthook-windows.yml` is the local override.
+  parallel: true
+  # RUN THIS SUITE BY HAND WITH `npm run gates`, NEVER THE BARE RUNNER.
+  #
+  # The runner builds a pre-push file list by diffing local against the remote, and when that list
+  # is empty it skips EVERY job and exits 0, which reads exactly like a clean run. Measured in the
+  # source repository: "36 jobs skipped, 0.11s, exit 0" against "36 of 36 green, ~19s". The runtime
+  # is the only tell. `--force` is the sole lever, and `npm run gates` is that flag with a name.
+  # It bites exactly when someone checks their work by hand: just after a push, on a freshly rebased
+  # branch, or on the trunk right after a merge.
+  #
+  # EVERY JOB CARRIES A `glob` NAMING THE FILES WHOSE CHANGE CAN ALTER ITS VERDICT, except a job
+  # that reads every tracked file or reads the tracker. A check that reads only committed files is a
+  # pure function of those files, so when a push changes none of them its verdict is the one the
+  # last green run gave, and `.github/workflows/verify.yml` runs every gate on the pull request regardless. `--force` runs a
+  # job whether or not its glob matches, so `npm run gates` is still the whole suite.
+  #
+  # THE RULE FOR A GLOB: re-derive it from the script's declared inputs (the files it reads, the
+  # modules it imports, the artifacts it compares, the emitter it re-runs), and when in doubt make
+  # it WIDER. A too-narrow glob is a gate that silently stops running on exactly the pushes that
+  # matter. With the default matcher `*` and `**` both cross `/`; the one trap is `dir/**/*.ext`,
+  # which needs at least one directory between, so write `dir/**` or `dir/*.ext`.
+  #
+  # `run: node --run <script>` RATHER THAN `npm run <script>`: it runs the package script with
+  # `node_modules/.bin` on PATH and skips the package manager's own start-up. Measured in the source
+  # repository at 0.9-1.2s against 2.1-3.1s through `npm run`, about a minute of pure launcher over
+  # a suite in sequence.
+  #
+  # DELIBERATELY ABSENT: any check that reads something outside the repository (another checkout, a
+  # token, a network, a language model). It runs in neither this file nor `.github/workflows/verify.yml`, and a digest gate
+  # stands in for it. Name each one here, with its reason, when you have one.
+  #
+  # A RETIRED JOB stays as a comment carrying the rule text worth keeping and the shape the job
+  # would take if it came back.
+  jobs:
+    # Every `run:` token here and in `.github/workflows/verify.yml` resolves to a package script, and every script no job
+    # invokes is declared by kind in the gate's own table. Reads three committed files; milliseconds.
+    - name: check-jobs
+      glob:
+        - 'package.json'
+        - 'lefthook.yml'
+        - '.github/workflows/verify.yml'
+        - 'scripts/check-jobs.mjs'
+      run: node --run check:jobs
+    - name: check-jobs-selftest
+      glob:
+        - 'package.json'
+        - 'lefthook.yml'
+        - '.github/workflows/verify.yml'
+        - 'scripts/check-jobs.mjs'
+      run: node --run check:jobs:selftest
+    # No glob: the citations gate reads every tracked text file, so any push can change its verdict.
+    - name: citations
+      run: node --run citations:check
+    # The worktree hooks and the guard, negative-tested: each case asserts the REASON a refusal
+    # reports. About a hundred git spawns, so re-measure it on your host before trusting the suite's
+    # total.
+    - name: worktree-hooks
+      glob:
+        - 'scripts/hooks/**'
+        - 'scripts/new-worktree.sh'
+        - 'scripts/render-worktree-context.mjs'
+        - 'scripts/prune-worktree-branches.mjs'
+        - '.claude/worktree-CONTEXT.md.tmpl'
+      run: node --run worktree:selftest
+    # The register's status line, its parenthetical dates, its mechanism sentence and its summary
+    # table, held to the `### D-` headings in both directions; and `CLAUDE.md`, which cites the
+    # register without a bound and must not grow one. Three committed files; milliseconds.
+    - name: register-status
+      glob:
+        - 'docs/decisions.md'
+        - 'CLAUDE.md'
+        - 'scripts/check-register-status.mjs'
+      run: node --run check:register
+    - name: register-status-selftest
+      glob:
+        - 'docs/decisions.md'
+        - 'CLAUDE.md'
+        - 'scripts/check-register-status.mjs'
+      run: node --run check:register:selftest
+    # The validators over the dry-run workflow's prompts, and the runner's own selftest.
+    # A pre-push job BY MEASUREMENT, not by preference. THE FIGURES ARE THE KIT AUTHOR'S HOST'S,
+    # NOT YOURS: macOS, Node 26, PowerShell 7 on PATH, 2026-09-20, as laid down: 2.3 s for the ten
+    # validators through `npm run` (two runs: 2313 ms, 2260 ms), of which eight PowerShell launches
+    # are most, and 3.3 s for the runner's selftest, whose hang case waits out a 2 s timeout.
+    # Re-measure on the slowest host that pushes (`time npm run dry-run:test`) and replace
+    # this note, naming the host. Where one child shell costs seconds (a host behind endpoint
+    # security can cost several seconds per launch, and a suite of about 120 launches minutes),
+    # delete both jobs here and leave the suite to `.github/workflows/verify.yml`, which runs it on every pull request
+    # regardless.
+    - name: dry-run-test
+      glob:
+        - 'dry-run/**'
+        - '.claude/skills/dry-run/**'
+        - '.claude/skills/dry-run-*/**'
+        - '.claude/agents/dry-run-*'
+        - 'package.json'
+      run: node --run dry-run:test
+    - name: dry-run-test-selftest
+      glob:
+        - 'dry-run/tests/run-tests.mjs'
+      run: node --run dry-run:test:selftest
+    # Every value in the count index re-derived from the source the index names for it. No glob: a
+    # key's source may be any tracked file, so any push can change its verdict. Milliseconds.
+    - name: count-index
+      run: node --run counts:check
+    # The gate's refusals, each exercised on a doctored fixture it builds under the temporary
+    # directory, with one undoctored control. Reads nothing but the gate itself.
+    - name: count-index-selftest
+      glob:
+        - 'scripts/check-count-index.mjs'
+      run: node --run counts:selftest
+    # The run-outcome record's validator and writer, negative-tested against the committed fixtures
+    # (one per terminal path), and the schema's intervention enum held to the policy file's list.
+    - name: outcomes-record-selftest
+      glob:
+        - 'tools/outcomes/**'
+        - 'dry-run/run-outcome.schema.json'
+        - 'dry-run/tests/fixtures/run-outcome/**'
+        - 'dry-run/workflow-policy.json'
+      run: node --run outcomes:record:selftest
+    # The learning loop's records re-validated and re-serialised, and its reports rebuilt in memory
+    # from them, byte-compared with what is committed. `outcomes` and `outcomes:propose` have no job:
+    # the first is this check's bare emitter, the second reads and writes the tracker.
+    - name: outcomes-check
+      glob:
+        - 'tools/outcomes/**'
+        - 'artifacts/outcomes/**'
+        - 'artifacts/outcomes/records/**'
+        - 'dry-run/run-outcome.schema.json'
+      run: node --run outcomes:check
+    - name: outcomes-selftest
+      glob:
+        - 'tools/outcomes/**'
+        - 'dry-run/run-outcome.schema.json'
+        - 'dry-run/tests/fixtures/run-outcome/**'
+      run: node --run outcomes:selftest
+    # The graph record, held to the files it names, to this file, to `.github/workflows/verify.yml`, to the prose page and
+    # to the tracker's formula. No glob, deliberately: the record's input, output and generator
+    # globs may name any file in the repository, so a push that deletes or renames any file can
+    # change the verdict. A hash-free walk of the declared globs; re-measure it as the record grows.
+    - name: pipeline-check
+      run: node --run pipeline:check
+    # Re-folds each node's declared inputs into a digest and compares it with the stamp the node
+    # wrote into its own output, so forgetting to regenerate is visible without regenerating. No
+    # glob for the same reason: its inputs are whatever the record declares.
+    - name: pipeline-stale
+      run: node --run pipeline:stale:check
+    # Both gates, the formula check and the sibling-checkout resolver, negative-tested against a
+    # synthetic record under the temp directory. One Node process per case, so seconds.
+    - name: pipeline-selftest
+      glob:
+        - 'tools/pipeline/**'
+        - 'tools/lib/estate-root.ts'
+      run: node --run pipeline:selftest
+    # The tracker's own pre-push hook, preserved, and the label and foreign-id rules over its open
+    # issues. Neither carries a glob: both read the tracker's database, not the push.
+    - name: beads
+      env:
+        NO_COLOR: '1'
+      run: bd hooks run pre-push {1} {2}
+    - name: beads-check
+      env:
+        NO_COLOR: '1'
+      run: node --run beads:check

@@ -1,0 +1,39 @@
+{
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "beads:check": "node scripts/check-beads.mjs",
+    "check:jobs": "node scripts/check-jobs.mjs",
+    "check:jobs:selftest": "node scripts/check-jobs.mjs --selftest",
+    "citations:check": "node tools/citations/check.ts",
+    "dry-run:test": "node dry-run/tests/run-tests.mjs",
+    "dry-run:test:selftest": "node dry-run/tests/run-tests.mjs --selftest",
+    "counts:check": "node scripts/check-count-index.mjs",
+    "counts:selftest": "node scripts/check-count-index.mjs --selftest",
+    "worktree:gc": "node scripts/prune-worktree-branches.mjs",
+    "worktree:selftest": "node scripts/hooks/worktree-hooks.selftest.mjs",
+    "outcomes:record:selftest": "node tools/outcomes/record.selftest.ts",
+    "outcomes": "node tools/outcomes/index.ts",
+    "outcomes:check": "node tools/outcomes/index.ts --check",
+    "outcomes:selftest": "node tools/outcomes/selftest.ts",
+    "outcomes:propose": "node tools/outcomes/propose.ts",
+    "pipeline:check": "node tools/pipeline/check.ts",
+    "pipeline:example": "node tools/pipeline/example/emit.ts",
+    "pipeline:selftest": "node tools/pipeline/selftest.ts",
+    "pipeline:stale": "node tools/pipeline/stale.ts",
+    "pipeline:stale:check": "node tools/pipeline/stale.ts --check",
+    "check:register": "node scripts/check-register-status.mjs",
+    "check:register:selftest": "node scripts/check-register-status.mjs --selftest",
+    "gates": "lefthook run pre-push --force"
+  },
+  "devDependencies": {
+    "js-yaml": "^5.3.0",
+    "lefthook": "2.1.12"
+  },
+  "allowScripts": {
+    "lefthook@2.1.12": true
+  }
+}

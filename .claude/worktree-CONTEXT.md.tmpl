@@ -1,0 +1,80 @@
+# Local context — takes precedence where it conflicts with general guidance
+
+You are working in a **git worktree**, not the primary checkout.
+
+- Path: `{{WORKTREE_PATH}}`
+- Branch: `{{BRANCH}}`, cut from `origin/main` at `{{BASE_SHA}}`
+- Task: `{{TASK_REF}}`
+- Cut at {{STARTED_AT}}; merge window closes {{DEADLINE}}
+
+## Git
+
+`{{BRANCH}}` is your branch and the only one you touch.
+
+## You are not alone in this repository
+
+Other agents and humans are editing this repository right now, in worktrees you cannot see. Their changes will land in `main` while you work.
+
+- Prefer additive change over in-place change.
+- After a rebase, re-read any file you read beforehand and are about to edit.
+- If a rebase produces conflicts you did not anticipate, stop and report them. Do not resolve creatively.
+
+The trunk-based model in the project instructions describes how the *team* reaches `main`, and it is what the primary checkout does. It is not permission to commit to `main` from here. Your route to trunk is a pull request.
+
+- Do not checkout, switch to, or push `main`. It is checked out in another worktree and git will refuse. There is no workaround worth attempting.
+- Do not run `git worktree`, `git gc`, `git prune`, or `git reflog expire`. The object store is shared with sibling worktrees.
+- Do not read or write outside `{{WORKTREE_PATH}}`. Sibling worktrees are in active use by other agents.
+- Commit and force-push freely, to `{{BRANCH}}` only.
+- Open every pull request with `--base main`. Never let a tool infer the base: a tool that infers one infers the hosting service's default branch, which need not be the trunk.
+- Open it ready for review, never `--draft`, unless the request says draft. Nothing here keys off the draft state, and the operator has to undo it by hand before anything moves (the *Git workflow* section of CLAUDE.md).
+
+`scripts/hooks/guard-git.mjs` enforces the rules above on every Bash command — including refusing a `gh pr create` that does not name `main` as its base — so a slip is refused rather than silently landing on someone else's work. The refusal text says what to do instead; read it rather than retrying a variation.
+
+## Environment
+
+### `npm ci` before any `npm` command
+
+**A fresh worktree has no `node_modules`.** `node_modules/` is gitignored, so `git worktree add`
+does not carry it across from the primary checkout — the tree you are standing in has the source and
+none of the dependencies. Run:
+
+```bash
+npm ci
+```
+
+**before the first `npm run` of the session**, and before anything that shells out to one: the gates,
+the emitters, `npx lefthook`, and the `Stop` hook that runs `typecheck` / `lint:strict:cached` / `pipeline:check`.
+Skip it and they fail on a missing binary rather than on anything you changed,
+which reads as a broken repository and is not one.
+
+`npm ci`, not `npm install` — `package-lock.json` is authoritative and CI installs the same way.
+Once per worktree is enough unless the lockfile changes under you in a rebase.
+
+**Nothing in this repository serves a port.** It is a Node/TypeScript toolchain: emitters that read
+committed inputs and write artifacts, plus the gates that keep them honest. There is no database, no
+container stack, no dev server and no browser in the loop.
+
+Two ports (`{{APP_PORT}}`, `{{SB_PORT}}`) are still probed and reserved for this worktree at
+provisioning time, and recorded in `.worktree/ports.env`. They are **unused**: nothing in this repository listens on a port. The reservation is kept so that provisioning stays collision-free if anything
+here ever needs a port again — not because something is listening.
+
+If you find yourself wanting a port, stop: it means you are about to build something this repository
+deliberately does not contain. Do not edit `package.json` or `.worktree/ports.env` to get something
+running.
+
+## Finishing
+
+1. Run the test suite (`npm ci` first, if you have not already this session).
+2. `git fetch origin && git rebase origin/main`
+3. Run the suite again. A rebase that applies cleanly can still break the build — that is the failure this step exists to catch.
+4. Push `{{BRANCH}}` and open the PR **against `main`**, ready for review — the base is typed, never inferred, and there is no `--draft`:
+
+   ```bash
+   git push -u origin {{BRANCH}}
+   gh pr create --base main --head {{BRANCH}} --title "<what changed>" --body "..."
+   ```
+
+   In the description, list: what changed; shared interfaces, schemas, or config files touched; flags added; and what you deliberately left undone.
+5. Stop. Do not merge, do not pick up follow-up work, do not open a second task.
+
+If the merge window closes before you finish: commit what is green behind the flag, open the PR marked partial with the remaining work listed, and stop. Do not widen scope to reach a tidier stopping point.
