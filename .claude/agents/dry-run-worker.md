@@ -23,7 +23,7 @@ the work item, and the PATH of the run's facts file. Anything else you need, you
 1. The `dry-run-contract` skill is preloaded. Its invariants hold on this step as on every
    other; it is not restated here.
 2. Read the facts file at the path you were handed. You may check it with
-   `dry-run/tools/Test-CeHostFacts.ps1`. Never ask for a fact, never write the file, and
+   `dry-run/tools/Test-HostFacts.ps1`. Never ask for a fact, never write the file, and
    treat a fact it lacks as absent rather than guessed.
 3. Open `.claude/skills/dry-run-contract/references/lifecycle.md` at the heading the
    dispatch names, and only there. Open another reference only when the step points to it.

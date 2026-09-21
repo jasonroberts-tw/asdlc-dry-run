@@ -70,7 +70,7 @@ const CASES = [
   ['sentences', 'the exhaustiveness flag trimmed from the contract page', (r) => edit(r, CONTRACT, swap('**That list is exhaustive**', 'That list is long')), /the intervention list is flagged exhaustive/],
   ['sentences', 'the negative list lost an item', (r) => edit(r, CONTRACT, swap('a test failure, ', '')), /the negative list: a test failure/],
   ['sentences', 'a run that may ask whether it may continue', (r) => edit(r, CONTRACT, swap('never asks merely', 'may ask')), /never asks merely whether it may continue/],
-  ['named-tools', 'a step names a tool that does not exist', (r) => edit(r, LIFECYCLE, swap('tools/Test-CeHostFacts.ps1', 'tools/Test-CeHostFactz.ps1')), /Test-CeHostFactz\.ps1` exists/],
+  ['named-tools', 'a step names a tool that does not exist', (r) => edit(r, LIFECYCLE, swap('tools/Test-HostFacts.ps1', 'tools/Test-HostFactz.ps1')), /Test-HostFactz\.ps1` exists/],
   ['named-tools', 'a reference file with no row in the table', (r) => writeFileSync(join(r, dirname(LIFECYCLE), 'orphan.md'), '# Orphan\n'), /orphan\.md has a row in the contract's References table/],
   ['policy', 'the intervention list no longer flagged exhaustive', (r) => editPolicy(r, (p) => ({ ...p, intervention: { ...p.intervention, exhaustive: false } })), /the intervention list is flagged exhaustive/],
   ['policy', 'a block without its date', (r) => editPolicy(r, (p) => ({ ...p, tests: { ...p.tests, setOn: undefined } })), /block `tests` carries a dated `setOn`/],

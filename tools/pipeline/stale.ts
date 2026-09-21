@@ -3,11 +3,11 @@
  *
  * WHAT THIS IS FOR. Every other staleness gate here works by regenerating a node's whole output and
  * diffing it, so automated detection reaches exactly as far as the nodes whose inputs all live in
- * this repository. N-08, N-15 and N-12 are the three it cannot reach: each one's `--check`
+ * this repository. a node, a node and a node are the three it cannot reach: each one's `--check`
  * needs the sibling `../estate` checkout, so it is wired into neither `lefthook.yml` nor
  * `.github/workflows/verify.yml` and runs only when somebody remembers to type it. CI does not clone
- * that checkout and should not -- N-15's Axis 6 walk is four minutes cold over 1,074
- * code-behinds.
+ * that checkout and should not -- one node's deepest walk is minutes cold over the
+ * whole estate.
  *
  * This gate does not run a generator. It re-folds each node's declared inputs and compares the fold
  * against the stamp the node wrote into its own output. That is a hash walk over `artifacts/**` --
@@ -134,7 +134,7 @@ console.log(
  * becomes WORK when a change lands on trunk rather than when somebody is trying to push. It also
  * branches -- an in-repo artifact digest gets per-node beads, but the upstream commit moving gets
  * `bd mol wisp corpus-regen`, because that formula already encodes invariants a generic
- * "regenerate N-10" bead would lose.
+ * "regenerate a node" bead would lose.
  *
  * Neither belongs in a file wired into `pre-push`.
  * ----------------------------------------------------------------------------------------------- */

@@ -33,7 +33,7 @@ started by a model deciding it would help.
 ## Run
 
 1. **Write the facts, once.** This skill is the launcher: run
-   `dry-run/tools/Write-CeHostFacts.ps1` for `<item>` with the checkout root as its target,
+   `dry-run/tools/Write-HostFacts.ps1` for `<item>` with the checkout root as its target,
    and keep the path it reports. The run directory is ignored by git, and this file is the only
    thing written before the approval. Never restate the file's contents in a dispatch.
 2. **Execute the lifecycle by heading.** Open

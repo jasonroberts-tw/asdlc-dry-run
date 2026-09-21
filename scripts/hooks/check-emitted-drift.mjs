@@ -8,10 +8,9 @@
  *
  * WAS `check-generator-drift.mjs`, and every trigger it had ran `generate:check`. That gate, and the
  * screen generator behind it, are deleted. What survives is the same defect against the emitters
- * that are still here: the catalogue emitter and its inputs, and N-14' two hand-authored
- * records. N-05's manifest validator had three triggers here until D-33 retired that node with
- * the SLICE kind and deleted `tools/spec-manifest/` and `specs/screens/`; the correction-log emitter
- * (N-20's until D-30) had one until D-36 deleted it. The file was renamed rather than deleted
+ * that are still here: the catalogue emitter and its inputs, and the two hand-authored records the
+ * learning loop reads. Other emitters had triggers here until the nodes behind them were retired,
+ * and each row went in the same change as its emitter. The file was renamed rather than deleted
  * because the failure mode is a property of emitted output, not of the generator that happened to
  * be the first example of it.
  *
@@ -26,9 +25,9 @@ import { npmRun, readHookInput, editTarget, toRepoRel } from './_shared.mjs'
 /**
  * Paths whose contents an emitter reads, paired with the gates worth re-running.
  *
- * A `corrections:log` row STOOD HERE for `tools/ledger/{report.ts,corrections.json}` until D-36
- * (2026-09-08) deleted the emitter and froze its rendered log under docs/retired/; the shape it
- * guarded -- an input edited and its emitter not re-run -- is the catalogue's below.
+ * A ROW STOOD HERE for another emitter until a decision deleted it and froze its rendered output
+ * under the retired directory; the shape it guarded -- an input edited and its emitter not
+ * re-run -- is the catalogue's below.
  *
  * `catalogue:check` rebuilds the published skill tree in memory and diffs it. `catalogue/SKILL.md` is
  * the hand-authored source of the tree's `SKILL.md`, so an edit there that is not
@@ -37,11 +36,11 @@ import { npmRun, readHookInput, editTarget, toRepoRel } from './_shared.mjs'
  */
 const TRIGGERS = [
   { re: /^catalogue\/SKILL\.md$/, gates: ['catalogue:check'] },
-  // The catalogue's hand-authored decision records are inputs too (D-33 added the verdict record
+  // The catalogue's hand-authored decision records are inputs too (a later decision added the verdict record
   // and the closure fixture beside the type resolutions and the capability seed) ...
   { re: /^tools\/catalogue\/[^/]+\.json$/, gates: ['catalogue:check'] },
   // ... and so is the kernel: every `catalogue/controls/<Type>.md` body is published verbatim as a
-  // reference, and graph.ts declares `catalogue/**` an N-01 input because a body edit is a
+  // reference, and graph.ts declares `catalogue/**` an input of that node because a body edit is a
   // staleness signal. README.md and not-carried.json match this pattern too; the emitter skips the
   // first and the gate is green over an unchanged tree, so the cost is the 1.5s above.
   { re: /^catalogue\/controls\/[^/]+\.md$/, gates: ['catalogue:check'] },
@@ -53,7 +52,7 @@ const TRIGGERS = [
   // `selftest.mjs` matches too and is not an input; the gate is green over an unchanged tree, so
   // that costs the 1.5s and nothing else. The `.json` decision records have their own row above.
   { re: /^tools\/catalogue\/[^/]+\.mjs$/, gates: ['catalogue:check'] },
-  // Node N-14' two hand-authored inputs: the policy record carrying the
+  // The two hand-authored inputs of the node that reads run records: the policy record carrying the
   // recurrence threshold, the u3 sample size and the judge model, and the reader's pin of the writer's
   // run-outcome schema. An edit to either changes what `npm run outcomes` accepts or derives, and
   // `outcomes:check` is the gate that says so -- seconds where the sibling clone is present,

@@ -16,7 +16,7 @@
  * absent -- tens of seconds, and CI is the right place for it.
  *
  * `generate:check` was the second of these gates until the screen generator was retired and deleted,
- * and `spec:validate` -- node N-05's behaviour-manifest validator -- was the second until D-33
+ * and `spec:validate` -- a node's behaviour-manifest validator -- was the second until a later decision
  * deleted that node with the SLICE kind. `pipeline:check` took the vacated third
  * place in the gate prune that followed: it reads only committed files, runs no
  * emitter, costs 0.55s (`time npm run pipeline:check`, real 0.549s, measured 2026-09-06), and it is

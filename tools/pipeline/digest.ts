@@ -8,11 +8,11 @@
  *
  *  1. **Computing it never runs the generator.** A sorted walk and a fold of per-file SHA-256s. For
  *     every node except the two roots the inputs are committed files in THIS repository, so the
- *     digest is computable in CI with no `../estate` checkout -- which is what puts N-08,
- *     N-15 and N-12 behind an automated gate for the first time. Their own `--check`s cannot
+ *     digest is computable in CI with no `../estate` checkout -- which is what puts a node,
+ *     a node and a node behind an automated gate for the first time. Their own `--check`s cannot
  *     move into CI and are not being asked to.
- *  2. **Per-group granularity.** "N-08 is stale because `artifacts/forms/**` moved" is actionable;
- *     "N-08 is stale" is not. So a group digest is a first-class value, not an intermediate.
+ *  2. **Per-group granularity.** "a node is stale because `artifacts/forms/**` moved" is actionable;
+ *     "a node is stale" is not. So a group digest is a first-class value, not an intermediate.
  *  3. **Reproducible byte-for-byte across machines.** Anything that varies with filesystem order,
  *     path separator, mtime or locale is excluded. The fold below reads file CONTENT and nothing
  *     else -- no size, no mode, no timestamp.
@@ -51,7 +51,7 @@ export const stringDigest = (s: string): Digest => sha256(s)
  * Fold a set of files into one digest, keyed by path so a RENAME registers as a change.
  *
  * Hashing content alone would make `git mv a.json b.json` invisible, and a renamed input is exactly
- * the change D-09 made when `artifacts/pilot-scope.json` became `artifacts/slices/<id>/scope.json` --
+ * the change a later decision made when `artifacts/pilot-scope.json` became `artifacts/slices/<id>/scope.json` --
  * the rename that left `control-map.json` citing a file that no longer exists. Path and content are
  * separated by a NUL, which cannot occur in either, so no path can be constructed that folds to the
  * same bytes as a different path plus content.

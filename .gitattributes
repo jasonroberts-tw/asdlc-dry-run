@@ -18,7 +18,7 @@
 # `text=auto` and not a blanket `text`: git keeps its own binary heuristic, so a file it reads as
 # binary is left byte-exact. Five baseline PNGs under `artifacts/design-system/baseline/` are
 # `i/-text` today and stay untouched. (`scripts/check-control-map.mjs`, plain ASCII that git scored
-# binary, was the sixth until D-32 deleted it with node N-06.)
+# binary, was the sixth until a later decision deleted it with a node.)
 * text=auto eol=lf
 
 # THE CARVE-OUT, AND WHY IT IS THE WHOLE MIRROR RATHER THAN THE CSVs.
@@ -40,6 +40,6 @@
 # reformatted `ui-enforcement-policy.json` on the way in and the README went on claiming 6 of 6
 # digests reproduced. A mirror-wide `-text` keeps the next byte-exact import
 # protected from the moment it lands rather than from the moment somebody remembers to add a pattern.
-# (D-34 deleted that mirror on 2026-09-07; `data/` is the one import today, and the rule stays for
+# (a later decision deleted that mirror on 2026-09-07; `data/` is the one import today, and the rule stays for
 # the next.)
 reference/** -text

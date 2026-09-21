@@ -4,7 +4,7 @@
 Validates a run's host-facts.json against host-facts.schema.json and refuses one that carries a secret.
 
 .DESCRIPTION
-The read-side check of the run's environment facts (workflow-policy.json `hostFacts`). Write-CeHostFacts.ps1
+The read-side check of the run's environment facts (workflow-policy.json `hostFacts`). Write-HostFacts.ps1
 runs it on what it just wrote, Phase 0 runs it before dispatching a worker, and a worker may run it on the path it was
 handed. It checks:
 

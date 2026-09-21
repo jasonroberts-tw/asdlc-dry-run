@@ -5,22 +5,22 @@ Writes the run's environment facts, <run directory>/host-facts.json, and validat
 
 .DESCRIPTION
 The run's environment facts (workflow-policy.json `hostFacts`; schema host-facts.schema.json). The launcher
-runs this right after Initialize-CeRunWorkspace.ps1, Phase 0 verifies the file with Test-CeHostFacts.ps1 and reruns this
+runs this right after Initialize-RunWorkspace.ps1, Phase 0 verifies the file with Test-HostFacts.ps1 and reruns this
 tool when it is missing or invalid, every worker reads the file by path before acting, and the orchestrator passes the
 PATH in each dispatch instead of restating the facts in prose. Re-runnable: it overwrites the file. It records, and
 never a secret value:
 
-  host              total memory (the GC's container-aware reading, the same one Initialize-CeValidation.ps1 records),
+  host              total memory (the GC's container-aware reading, the same one Initialize-Validation.ps1 records),
                     the processor count, and sequentialChainsRequired -- total memory below policy
                     validation.sequentialChainsBelowTotalMemoryGb, so build, test and browser chains run one at a time;
   playwright        PLAYWRIGHT_HOST_PLATFORM_OVERRIDE as this process carries it (the launcher applies it first) and
                     whether the Ubuntu release needs it (policy hostPrerequisites.playwrightBrowser);
-  liveGate          the owned-mode start cap Invoke-CeLiveStackGate.ps1 -StartupTimeoutSeconds defaults to, the statement
+  liveGate          the owned-mode start cap Invoke-LiveStackGate.ps1 -StartupTimeoutSeconds defaults to, the statement
                     that -ServerUrl is the validator's test seam and never a run procedure, and when seedPreflight
                     not-declared is accepted (policy hostFacts.liveGate, copied so a worker reads one file);
   kerberos          whether a ticket is present (klist -s), the ticket-granting ticket's expiry and its realm parsed from
                     klist's listing -- never the principal; Windows reports not applicable;
-  testIds           the story-scoped Assert-CeTestIds.ps1 invocation (-TestProject the shared Playwright project,
+  testIds           the story-scoped Assert-TestIds.ps1 invocation (-TestProject the shared Playwright project,
                     -TestFiles the story's files under it) and why the project-wide run is not the gate;
   hostPrerequisites the preflight's status, report path and failed codes, from -HostPrerequisitesReportPath;
   environmentNames  the identity and tenant names as present or absent.
@@ -36,14 +36,14 @@ The User Story id.
 The target repository checkout; the run directory defaults beneath it.
 
 .PARAMETER RunDirectory
-The transient run directory. Default: the CE_RUN_DIRECTORY environment variable when set, otherwise
+The transient run directory. Default: the RUN_RUN_DIRECTORY environment variable when set, otherwise
 <TargetRoot>/.dry-run/run/<Story>. Created when missing.
 
 .PARAMETER PluginRoot
 The dry-run/ directory. Default: derived from this tool's location.
 
 .PARAMETER HostPrerequisitesReportPath
-Test-CeHostPrerequisites.ps1's JSON report as the launcher wrote it into the run directory. Optional.
+Test-HostPrerequisites.ps1's JSON report as the launcher wrote it into the run directory. Optional.
 
 .PARAMETER HostPrerequisitesStatus
 The status to record when no report is given: skipped (the launcher ran with -SkipHostPreflight) or not-run (default).
@@ -130,16 +130,16 @@ $resolvedPluginRoot = if ([string]::IsNullOrWhiteSpace($PluginRoot)) { [IO.Path]
 $contractRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
 $resolvedPolicyPath = if ([string]::IsNullOrWhiteSpace($PolicyPath)) { Join-Path $contractRoot "workflow-policy.json" } else { [IO.Path]::GetFullPath($PolicyPath) }
 $resolvedSchemaPath = if ([string]::IsNullOrWhiteSpace($SchemaPath)) { Join-Path $contractRoot "host-facts.schema.json" } else { [IO.Path]::GetFullPath($SchemaPath) }
-$resolvedValidatorPath = if ([string]::IsNullOrWhiteSpace($ValidatorPath)) { Join-Path $PSScriptRoot "Test-CeHostFacts.ps1" } else { [IO.Path]::GetFullPath($ValidatorPath) }
+$resolvedValidatorPath = if ([string]::IsNullOrWhiteSpace($ValidatorPath)) { Join-Path $PSScriptRoot "Test-HostFacts.ps1" } else { [IO.Path]::GetFullPath($ValidatorPath) }
 if (-not (Test-Path -LiteralPath $resolvedPolicyPath -PathType Leaf)) { throw "HOST_FACTS_POLICY_MISSING: workflow-policy.json was not found at '$resolvedPolicyPath'." }
-if (-not (Test-Path -LiteralPath $resolvedValidatorPath -PathType Leaf)) { throw "HOST_FACTS_VALIDATOR_MISSING: Test-CeHostFacts.ps1 was not found at '$resolvedValidatorPath'." }
+if (-not (Test-Path -LiteralPath $resolvedValidatorPath -PathType Leaf)) { throw "HOST_FACTS_VALIDATOR_MISSING: Test-HostFacts.ps1 was not found at '$resolvedValidatorPath'." }
 $policy = Get-Content -LiteralPath $resolvedPolicyPath -Raw | ConvertFrom-Json
 $hostFactsPolicy = Get-PolicyValue -Object $policy -PathSegments @("hostFacts")
 
 if (-not (Test-Path -LiteralPath $TargetRoot -PathType Container)) { throw "HOST_FACTS_TARGET_MISSING: the target root '$TargetRoot' is not a directory." }
 $resolvedTargetRoot = (Resolve-Path -LiteralPath $TargetRoot).Path
 $storyText = $Story.ToString([Globalization.CultureInfo]::InvariantCulture)
-$runDirectoryVariable = [string](Get-PolicyValue -Object $hostFactsPolicy -PathSegments @("runDirectoryEnvironmentVariable") -Default "CE_RUN_DIRECTORY")
+$runDirectoryVariable = [string](Get-PolicyValue -Object $hostFactsPolicy -PathSegments @("runDirectoryEnvironmentVariable") -Default "RUN_RUN_DIRECTORY")
 $resolvedRunDirectory = if (-not [string]::IsNullOrWhiteSpace($RunDirectory)) {
     [IO.Path]::GetFullPath($RunDirectory)
 } elseif (-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($runDirectoryVariable))) {
@@ -167,7 +167,7 @@ if (-not [string]::IsNullOrWhiteSpace($HostPrerequisitesReportPath)) {
     $prerequisitesFailed = @(Get-PropertyValue $report "failed" | Where-Object { $null -ne $_ } | ForEach-Object { [string]$_ })
 }
 
-# --- host sizing (the same reading Initialize-CeValidation.ps1 records) --------------------------------------------------------
+# --- host sizing (the same reading Initialize-Validation.ps1 records) --------------------------------------------------------
 
 $platform = if ($IsWindows) { "windows" } elseif ($IsMacOS) { "macos" } else { "linux" }
 $threshold = [double](Get-PolicyValue -Object $policy -PathSegments @("validation", "sequentialChainsBelowTotalMemoryGb") -Default 32)
@@ -229,7 +229,7 @@ if ($platform -ne "windows") {
                     }
                 }
             }
-            $kerberos.note = "A valid ticket is present; a live gate or Invoke-CeTenantSql.ps1 run after the ticket-granting ticket expires fails 'Cannot generate SSPI context', which is a host gap for the operator (kinit in their own terminal), never something to fix inside the run."
+            $kerberos.note = "A valid ticket is present; a live gate or Invoke-TenantSql.ps1 run after the ticket-granting ticket expires fails 'Cannot generate SSPI context', which is a host gap for the operator (kinit in their own terminal), never something to fix inside the run."
         } else {
             $kerberos.note = "No valid ticket (klist -s); the local API server's tenant SQL connection (Integrated Security) needs one (KERBEROS_TICKET_MISSING in the preflight). The realm is the USER domain, not the resource domain."
         }
@@ -251,11 +251,11 @@ $testIdsPlanPath = Join-Path $resolvedTargetRoot ".dry-run/plans/<story-slug>-$s
 $testIdsScopeParameter = [string](Get-PolicyValue -Object $hostFactsPolicy -PathSegments @("testIds", "scopeParameter") -Default "-TestFiles")
 $testIdsTestFilesSource = [string](Get-PolicyValue -Object $hostFactsPolicy -PathSegments @("testIds", "testFilesSource") -Default "the builder's changedFiles under the shared Playwright project, repository-relative and comma-separated")
 $testIds = [ordered]@{
-    tool = "Assert-CeTestIds.ps1"
+    tool = "Assert-TestIds.ps1"
     scope = "story"
     planPath = $testIdsPlanPath
     sharedTestProject = if (Test-Path -LiteralPath $sharedTestProject -PathType Container) { $sharedTestProject } else { $null }
-    invocation = "Assert-CeTestIds.ps1 -PlanPath $testIdsPlanPath -TargetRoot $resolvedTargetRoot -TestProject $sharedTestProject $testIdsScopeParameter <this story's Playwright files under that project: $testIdsTestFilesSource>"
+    invocation = "Assert-TestIds.ps1 -PlanPath $testIdsPlanPath -TargetRoot $resolvedTargetRoot -TestProject $sharedTestProject $testIdsScopeParameter <this story's Playwright files under that project: $testIdsTestFilesSource>"
     reason = [string](Get-PolicyValue -Object $hostFactsPolicy -PathSegments @("testIds", "reason") -Default "the shared Playwright project carries other stories' literals, so -TestProject names the shared project and -TestFiles names this story's files under it; the project-wide run is not the gate")
 }
 
@@ -277,7 +277,7 @@ foreach ($name in @(Get-PolicyValue -Object $policy -PathSegments @("validation"
 $facts = [ordered]@{
     schemaVersion = 1
     writtenUtc = [DateTimeOffset]::UtcNow.ToString("O")
-    writer = "Write-CeHostFacts.ps1"
+    writer = "Write-HostFacts.ps1"
     story = $Story
     pluginRoot = $resolvedPluginRoot
     targetRoot = $resolvedTargetRoot
@@ -317,7 +317,7 @@ $validation = $null
 try { $validation = (($validationOutput | ForEach-Object { [string]$_ }) -join [Environment]::NewLine) | ConvertFrom-Json } catch { $validation = $null }
 if ($null -eq $validation -or $validation.status -ne "valid") {
     $reasons = if ($null -ne $validation) { @($validation.errors) -join "; " } else { ($validationOutput | ForEach-Object { [string]$_ }) -join " " }
-    throw "HOST_FACTS_INVALID: Test-CeHostFacts.ps1 refused the written file '$factsPath': $reasons"
+    throw "HOST_FACTS_INVALID: Test-HostFacts.ps1 refused the written file '$factsPath': $reasons"
 }
 
 [ordered]@{

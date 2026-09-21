@@ -37,7 +37,7 @@ export type Verdict =
   | 'pin-drift'
   /**
    * A real gate already covers it (`detection.via` is `regeneration` or `none`). Reported, never
-   * failed. Until D-33 a `'never'` staleness landed here too; that value left with the SLICE kind.
+   * failed. A third staleness value landed here too, until the node kind that used it was retired.
    */
   | 'not-applicable'
 
@@ -73,8 +73,8 @@ function assessDigest(node: PipelineNode, root: string): Report {
   const stamp = readStamp(node, root)
   if (!stamp) {
     // ONE pass, reused. `computeInputs` is the expensive call in this module -- a walk and a
-    // SHA-256 of every declared input, measured at 183/283/170 ms for N-08/N-15/N-12
-    // (1,257 form documents each, plus N-15's `procedures.json`). It was called twice here,
+    // SHA-256 of every declared input, measured in the low hundreds of milliseconds per node
+    // (the same corpus each, plus one node's own index). It was called twice here,
     // once destructured and once inline in the detail string below, and this is the branch EVERY
     // digest node takes until the first stamps are written -- so the pre-push
     // gate `lefthook.yml` advertises as sub-second and `verify.yml` as "Milliseconds" was doing
@@ -112,7 +112,7 @@ function assessDigest(node: PipelineNode, root: string): Report {
         continue
       }
       // THE SAME PIN-DRIFT RULE `assessLegacyCommit` APPLIES, and a digest node needs it just as
-      // much. N-08, N-15 and N-12 each carry a `checkout` input group AND are
+      // much. Some nodes carry a `checkout` input group AND are
       // `staleness: 'inputs'`, so once they are stamped, treating "somebody pulled the sibling
       // checkout" as a moved input would FAIL this gate on every developer machine not sitting
       // exactly on the pinned commit. Ahead of the pin is a decision not yet taken, not a defect.
@@ -164,7 +164,7 @@ function assessDigest(node: PipelineNode, root: string): Report {
 }
 
 /**
- * The two C# roots. Their `provenance.json` records the commit they parsed, so their signal is a
+ * The two nodes that parse the sibling checkout. Their `provenance.json` records the commit they parsed, so their signal is a
  * commit comparison rather than a digest -- coarser than everyone else's, and correctly so.
  *
  * The distinction that carries the weight is AHEAD versus DIVERGED. A checkout ahead of the pin is
@@ -249,7 +249,7 @@ function assessLegacyCommit(node: PipelineNode, root: string): Report {
 
   // Not reachable from HEAD. The artifacts cite a commit this checkout cannot produce, which is the
   // shape of a resurrected or force-pushed branch -- the case `scripts/check-provenance.mjs` exists
-  // to catch from the D-10 side.
+  // to catch from the other side.
   return {
     node,
     verdict: 'stale',
@@ -296,9 +296,9 @@ export function assess(node: PipelineNode, root: string = ROOT): Report {
  * does not fail, and each exclusion is a decision rather than a softening.
  *
  *  - `'grows'` NODES NEVER FAIL. The single most important line in this file. A push blocked on
- *    "N-01 should be reconciled" is a push people send with `--no-verify`, and `lefthook.yml`
+ *    "a node should be reconciled" is a push people send with `--no-verify`, and `lefthook.yml`
  *    is already explicit that a bypassed hook is worse than no hook. (`'never'` nodes -- delivered
- *    cuts -- were not assessed at all, until D-33 retired the SLICE kind and the value with it; the
+ *    cuts -- were not assessed at all, until that node kind was retired and the value with it; the
  *    `staleness !== 'inputs'` test below is unchanged and now means `'grows'` alone.)
  *
  *  - AN UNSTAMPED ARTIFACT PREDATES THIS MECHANISM. It was built before anything wrote a provenance
@@ -315,8 +315,8 @@ export function assess(node: PipelineNode, root: string = ROOT): Report {
  *    corpus, on a condition the pusher did not create. Reported, because it silently invalidates the
  *    three deep `--check`s; never failed.
  *
- *  - LEGACY-COMMIT DIVERGENCE, by contrast, DOES fail nothing here only because N-10 and N-07
- *    cannot be fixed by any commit in this repository either -- their re-extraction needs a .NET SDK
+ *  - LEGACY-COMMIT DIVERGENCE, by contrast, DOES fail nothing here only because the two nodes that parse the sibling checkout
+ *    cannot be fixed by any commit in this repository either -- their re-extraction needs a toolchain
  *    and 2-4 minutes. It is the loudest report this gate produces.
  *
  * What DOES fail: a node that carried a valid stamp and whose declared inputs have since moved. That

@@ -8,15 +8,15 @@
  * ever installs a full tree there -- and the hardcoded path simply does not exist. `scripts/`
  * spawned two tools that way and both died before doing any work: `lint-ratchet.mjs` with ENOENT on
  * eslint, and `generate-api-client.mjs` with the friendlier but equally wrong "openapi-typescript is
- * not installed. Run `npm install` first." (That second script is gone: D-23 retired
- * node N-02 and replaced it with `merge-slice-schemas.mjs`, which spawned nothing (and which
- * D-33 has since deleted with node N-03). The account
+ * not installed. Run `npm install` first." (That second script is gone: a later decision retired
+ * a node and replaced it with `merge-slice-schemas.mjs`, which spawned nothing (and which
+ * a later decision has since deleted with a node). The account
  * stays because it is what the bead was about, and because the failure it describes is a property of
  * worktrees rather than of either script.)
  *
  * The consequence was not a broken build, which is why it survived: it is that an agent working in a
  * worktree cannot run two of the gates it is expected to satisfy, and finds out at CI. Every agent
- * lane in this repository runs in a worktree (the slice lane did too, until D-33 retired it).
+ * lane in this repository runs in a worktree (the slice lane did too, until a later decision retired it).
  *
  * NOT `npx`. `npx` would also find the binary, and would also silently DOWNLOAD one that is not
  * installed -- turning a missing devDependency into a network fetch of whatever version resolves

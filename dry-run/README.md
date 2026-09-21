@@ -55,8 +55,8 @@ A rule has one home. Before writing one, decide which:
 
 ## The facts file and its two tools
 
-`dry-run/tools/Write-CeHostFacts.ps1` writes the run's environment facts into one file under
-the run directory, once, and runs `dry-run/tools/Test-CeHostFacts.ps1` on what it wrote; the
+`dry-run/tools/Write-HostFacts.ps1` writes the run's environment facts into one file under
+the run directory, once, and runs `dry-run/tools/Test-HostFacts.ps1` on what it wrote; the
 validator holds the file to `dry-run/host-facts.schema.json`, to its own run directory, and
 refuses one that carries a secret value. The file's name and the environment variable that can
 name the run directory are in the policy file (block `hostFacts`).

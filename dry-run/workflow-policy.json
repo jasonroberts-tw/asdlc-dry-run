@@ -37,7 +37,7 @@
 
   "hostFacts": {
     "file": "host-facts.json",
-    "fileMeans": "The name of the one environment-facts file under the run directory. Every dispatch passes its PATH and never restates its contents; dry-run/tools/Write-CeHostFacts.ps1 writes it and dry-run/tools/Test-CeHostFacts.ps1 validates it against dry-run/host-facts.schema.json.",
+    "fileMeans": "The name of the one environment-facts file under the run directory. Every dispatch passes its PATH and never restates its contents; dry-run/tools/Write-HostFacts.ps1 writes it and dry-run/tools/Test-HostFacts.ps1 validates it against dry-run/host-facts.schema.json.",
     "runDirectoryEnvironmentVariable": "WORKFLOW_RUN_DIRECTORY",
     "runDirectoryEnvironmentVariableMeans": "When set, names the run directory, and the writer uses it instead of deriving one beneath the target checkout. A launcher sets it on its own process so every child inherits it.",
     "reason": "Facts a run measures once are read by path. Restated in a dispatch they are paid for on every dispatch, and any two copies can disagree.",

@@ -4,22 +4,21 @@
  *   npm run check:register             the gate
  *   npm run check:register:selftest    its fixtures -- every assertion exercised on a doctored copy
  *
- * THE JOB THIS EXISTS FOR. The register's status line said "every decision from D-01 to D-22 is
- * recorded and applied" while D-23 through D-32 were recorded in the same file, and its
- * `## Decisions — recorded and applied` table stopped at D-16. Ten consecutive decisions were
- * appended without touching either -- the convention that actually emerged was additive only. The
- * line's own blockquote had predicted this twice ("all 16 decisions" with D-18 recorded, then
- * `D-01 … D-18` with D-20 recorded) and named the mechanism that was supposed to stop it: the range
- * "is checked by reading the `### D-` headings below, which is the same act as adding one". It was
- * not the same act. Four more hand-maintained files restated the range at four different stale
- * values (D-30, D-26, D-18, D-16) -- the multi-copy drift `count-index.md` exists to stop, for a
- * figure that deliberately gets no `CNT-*` key because it moves when somebody records a decision,
- * not when the estate is re-measured.
+ * THE JOB THIS EXISTS FOR. A register's status line said "every decision from D-01 to D-22 is
+ * recorded and applied" while ten more were recorded in the same file below it, and its
+ * `## Decisions — recorded and applied` table stopped earlier still. Those ten were appended
+ * without touching either: the convention that actually emerged was additive only. The line's own
+ * blockquote had predicted it twice and named the mechanism that was supposed to stop it: the
+ * range "is checked by reading the `### D-` headings below, which is the same act as adding one".
+ * It was not the same act. Four more hand-maintained files restated the range at four different
+ * stale values -- the multi-copy drift `count-index.md` exists to stop, for a figure that
+ * deliberately gets no `CNT-*` key because it moves when somebody records a
+ * decision, not when what you measure is re-measured.
  *
- * WHAT THE RECORD IS. The `### D-NN` headings -- EXACTLY three hashes. `## D-13 · The corpus is a
- * census again (2026-08-24)` is a level-two NARRATIVE heading further down the file, not a second
- * D-13: a gate keyed on `^#{2,3} D-` reports a duplicate and is red on arrival. Do not widen the
- * anchor to "tidy" it. N is max(id), not the last heading, because D-09 is filed before D-06.
+ * WHAT THE RECORD IS. The `### D-NN` headings -- EXACTLY three hashes. A level-two NARRATIVE
+ * heading further down the file that opens with the same id is not a second entry: a gate keyed
+ * on `^#{2,3} D-` reports a duplicate and is red on arrival. Do not widen the anchor to "tidy" it.
+ * N is max(id), not the last heading, because a decision can be filed out of numeric order.
  *
  * WHAT FAILS THE JOB:
  *   1. no `### D-` heading at all, a duplicate id, or a gap (the ids must be exactly 1..N)
@@ -33,11 +32,10 @@
  *   6. the status line's parenthetical -- `(D-09 added 2026-08-21; D-10 and D-11 added 2026-08-23;
  *      …)` -- dates a decision on a day other than the one its section's opening `**Recorded
  *      <date>` line carries, names an id with no heading or no Recorded line, or omits a decision
- *      that has one; or a decision from the first one that carries a Recorded line onward (D-09
- *      today; derived, not hard-coded) has none. The dates were "copied from each
- *      section's Recorded line and not gated" until the tier-a sweep's wave-1 fix-up
- *      corrected a D-13/D-14 date swap BY HAND -- exactly the drift an ungated hand-copied
- *      parenthetical produces, and exactly the shape items 2-5 exist for.
+ *      that has one; or a decision from the first one that carries a Recorded line onward
+ *      (derived, not hard-coded) has none. The dates were "copied from each section's Recorded
+ *      line and not gated" until a fix-up corrected a swapped pair BY HAND -- exactly the drift
+ *      an ungated hand-copied parenthetical produces, and exactly the shape items 2-5 exist for.
  *
  * An anchor that finds nothing FAILS. Update the prose from the headings, never the headings from the
  * prose, and never delete a line to silence this gate. The one exception to that direction is item
@@ -46,11 +44,11 @@
  *
  * WHAT IS NOT CHECKED, deliberately: the Decision and Applied-as text of the table rows (they
  * paraphrase, so title equality would be red on arrival); the "All twelve tasks are complete" count
- * on the same line; the Recorded lines of D-01 to D-08, which have none (the parenthetical starts at
- * D-09, and the rule is anchored on the first section that carries one rather than on a numeral);
- * and range mentions anywhere but the citing files -- D-22 is this repository's precedent for
- * refusing a repository-wide regex, and the legitimately narrower ranges elsewhere
- * (a design note's D-01…D-15, say) are exactly what such a regex would flag.
+ * on the same line; the Recorded lines of the entries filed before the convention existed, which
+ * have none (the rule is anchored on the first section that carries one rather than on a numeral);
+ * and range mentions anywhere but the citing files -- a repository-wide regex was measured and
+ * refused, because the legitimately narrower ranges elsewhere (a design note citing `D-01…D-15`,
+ * say) are exactly what it would flag.
  *
  * NEGATIVE TESTING. `--selftest` copies the register and the citing files under `os.tmpdir()` and
  * doctors ONE thing per case, asserting the run fails FOR THAT REASON -- plus a control that the

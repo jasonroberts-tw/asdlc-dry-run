@@ -50,7 +50,7 @@
  *
  *   - QUOTATIONS. A retest log quotes stale citations on purpose, and
  *     `docs/retired/` records what a retired document said (the correction log frozen there since
- *     D-36 records what a correction SAID at the time). CLAUDE.md exempts quotations from the count index for exactly
+ *     a later decision records what a correction SAID at the time). CLAUDE.md exempts quotations from the count index for exactly
  *     this reason, and the same logic applies here: a gate that fails on the record of a past defect
  *     is a gate nobody can make green, so it gets deleted and checks nothing. See `HISTORY`.
  *   - WHETHER THE CITED LINE SAYS WHAT THE CITER CLAIMS. That needs a phrase, which is what
@@ -60,16 +60,16 @@
  *     numerals rather than a scanner. Tracked separately.
  *   - BARE FILENAME MENTIONS -- a backticked `X.md` carrying no `:NN` and no `§`. `LINE_RE` and
  *     `SECTION_RE` below both require a locator, so a bare name is outside the definition of a
- *     citation used here. **That was measured and refused, not overlooked: see D-22.** A tracked
+ *     citation used here. **That was measured and refused, not overlooked: see a later decision.** A tracked
  *     issue walked every one of them. A blanket rule produces 327 findings, of which the large
  *     majority are correct writing: shorthand for a path the document states once, deliberate
- *     mentions of files D-18 deleted (where the mention IS the record), and per-slice deliverables
+ *     mentions of files a later decision deleted (where the mention IS the record), and per-slice deliverables
  *     that `tools/pipeline/check.ts:139` already tolerates as "no slice is admitted yet". The
  *     narrow version -- a live file naming a RETIRED file by bare basename must spell the
  *     `docs/retired/` path -- flags 11, of which 10 are correct; one of those 10 is a frozen grep
  *     result its own document declares literal, so the rule would demand falsifying evidence.
  *     **Do not add either rule here.** The residue is real but semantic -- a bare name is a defect
- *     only when the passage presents the file as extant -- so D-22 makes it a review habit and
+ *     only when the passage presents the file as extant -- so a later decision makes it a review habit and
  *     names the one mechanical shape worth fixing on sight: a source attribution, "per `X.md`",
  *     with no locator.
  *
@@ -266,7 +266,7 @@ export function historyReason(file: string): string | null {
  * Three strategies, in order. Most citations are written relative to the repository root, but plenty
  * are written relative to the citing file's own directory, and a third group names only a BASENAME
  * (`SKILL.md:78` from inside a mirror's README, describing a mirrored tree one directory down -- the
- * shape the `reference/` skill mirror's README had until D-34 deleted that mirror; the selftest
+ * shape the `reference/` skill mirror's README had until a later decision deleted that mirror; the selftest
  * keeps the case on synthetic paths). The basename strategy demands a UNIQUE match: two files with the same name make the
  * citation genuinely ambiguous, and guessing which was meant is how a checker starts asserting the
  * wrong thing confidently.
@@ -292,7 +292,7 @@ export function resolveTarget(
   if (ending.length > 1) {
     // NEAREST WINS. `SKILL.md` was the name of five tracked files when this was written, four of
     // them Claude Code skills; cited from inside the `reference/` skill mirror's README (deleted by
-    // D-34) it unambiguously meant the one in the mirrored tree beside it. Preferring the deepest shared
+    // a later decision) it unambiguously meant the one in the mirrored tree beside it. Preferring the deepest shared
     // prefix with the citing file is how a human reads a bare filename, and without it every common
     // basename is reported ambiguous forever.
     const nearest = ending
@@ -344,7 +344,7 @@ function sharedPrefixLength(a: string, b: string): number {
 
 /**
  * AN `isDeliveredPackage(file)` PREDICATE STOOD HERE, matching `artifacts/slices/<id>/handoff/**`,
- * and D-30 deleted it with the packages. The argument is kept because the SHAPE will recur the next
+ * and a later decision deleted it with the packages. The argument is kept because the SHAPE will recur the next
  * time this repository copies documents under new paths.
  *
  * It excluded a delivered handoff package from this gate on BOTH sides, for two different reasons.
@@ -359,7 +359,7 @@ function sharedPrefixLength(a: string, b: string): number {
  * IF A FUTURE NODE COPIES DOCUMENTS UNDER NEW PATHS, that second failure returns on the day the copy
  * lands, and the fix is this predicate again: filter the BASENAME INDEX and never `trackedSet`, so a
  * citation spelling the copy's path out in full still resolves while a bare basename cannot silently
- * reach it. Recover the original from `git show <D-30>^:tools/citations/scan.ts`.
+ * reach it. Recover the original from `git show <a later decision>^:tools/citations/scan.ts`.
  */
 
 /** Index of basename -> every tracked path with that basename. */
@@ -470,7 +470,7 @@ const bare = (l: string): string =>
 export function namesSection(section: string, lines: readonly string[]): boolean {
   const candidates = lines.map(bare).filter(Boolean)
   // An ATX heading matches by CONTAINMENT, not prefix. Headings here regularly carry a part or node
-  // qualifier ahead of the name a citation uses -- `## PART 5 — N-20` is cited as `§ N-20` --
+  // qualifier ahead of the name a citation uses -- `## PART 5 — a node` is cited as `§ a node` --
   // and requiring the citation to reproduce the whole heading would fail every one of them.
   const headings = headingsOf(lines).map((h) => h.toLowerCase())
   const words = section
@@ -507,7 +507,7 @@ export function namesSection(section: string, lines: readonly string[]): boolean
 /**
  * Whether `§ <text>` is naming a SECTION at all, rather than running on into prose.
  *
- * Section names in this repository are capitalised (`§ Closure`, `§ INVARIANTS`, `§ D-04`), quoted
+ * Section names in this repository are capitalised (`§ Closure`, `§ INVARIANTS`, `§ a later decision`), quoted
  * (`§ "Measured state"`) or numbered (`§5`). A lowercase first word means the `§` was used as a
  * preposition in a sentence -- `` `artifacts/extraction-report.md` § header, "Runtime" line `` means
  * the document's header block, not a heading called "header" -- and asserting a heading exists for

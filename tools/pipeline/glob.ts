@@ -67,7 +67,7 @@ export const matchesGlob = (path: string, glob: string): boolean => globToRegExp
 /**
  * The longest leading run of literal segments, which is the only directory a glob can match under.
  *
- * Walking from the repository root for every glob would read `artifacts/` -- 1,257 form documents
+ * Walking from the repository root for every glob would read all of `artifacts/` -- every document
  * and a 51 MB `procedures.json` -- once per input group. Rooting the walk at `artifacts/forms` for
  * `artifacts/forms/*.json` keeps a whole-graph digest to the files that can actually match.
  */

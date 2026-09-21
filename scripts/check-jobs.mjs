@@ -78,7 +78,7 @@ const NPM_RUN_RE = /\b(npm run|node --run) (?:--silent )?([A-Za-z0-9][A-Za-z0-9:
 const GATE_SHAPED_RE = /^check:|:(?:check|selftest|selfcheck)$/
 /**
  * A repo-relative `tools/`, `scripts/` or `migration/` path on a script's command line. `migration/`
- * joined with D-38: `migration:test` names the plugin's test runner there, and a moved or misspelled
+ * joined with a later decision: `migration:test` names the plugin's test runner there, and a moved or misspelled
  * runner would otherwise pass this gate and fail at the next push.
  */
 const REPO_PATH_RE = /(?:^|\s)((?:tools|scripts|migration)\/[^\s"'&|;]+)/g
@@ -464,7 +464,7 @@ function cases() {
       expect: /^lefthook\.yml pre-push\/doctored invokes `npm run no:such:script`, which is not/,
     },
     {
-      // Appended rather than substituted since D-36: the one `run: |` step verify.yml carried (the
+      // Appended rather than substituted since a later decision: the one `run: |` step verify.yml carried (the
       // correction log's `reports are current`) went with its emitter, so the copy gains a step.
       name: 'a token inside a multi-line `run: |` block in verify.yml is read, and does not resolve',
       doctor: (dir) =>
@@ -528,7 +528,7 @@ function cases() {
         /^`check:provenance` names scripts\/check-provenance-renamed\.mjs, which does not exist/,
     },
     {
-      // D-38: the plugin's test runner lives under migration/, the third root the path check reads.
+      // a later decision: the plugin's test runner lives under migration/, the third root the path check reads.
       name: 'a script names a migration/ file that was moved',
       doctor: (dir) =>
         editScripts(dir, (scripts) => {

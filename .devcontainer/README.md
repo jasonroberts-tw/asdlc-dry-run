@@ -8,8 +8,8 @@ git clone https://github.com/<owner>/<repository>.git
 code <repository>           # then: "Reopen in Container" when VS Code offers
 ```
 
-The first build takes several minutes and is cached afterwards. You get Node, `bd`, the .NET SDK for
-the C# extractors, `gh`, Claude Code and the beads plugin marketplace.
+The first build takes several minutes and is cached afterwards. You get Node, `bd`, `gh`, Claude Code and the
+tracker's plugin marketplace, plus whatever toolchain you add to the image.
 
 | File | What it holds |
 |---|---|

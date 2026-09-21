@@ -18,7 +18,7 @@ Intake changes nothing: no branch, no edit, no push, no comment. It:
    its first action, and raises `REQUIRED_SERVER_UNAVAILABLE` if one fails; an OPTIONAL server that
    is absent is recorded as absent, and intake continues;
 2. verifies the facts file at the path the launcher handed it, with
-   `dry-run/tools/Test-CeHostFacts.ps1`, and raises `HOST_PREREQUISITES_INCOMPLETE`, once,
+   `dry-run/tools/Test-HostFacts.ps1`, and raises `HOST_PREREQUISITES_INCOMPLETE`, once,
    naming every failed check, when the facts say the host is not ready;
 3. reads the <work item> and every comment on it, in order, every author;
 4. resolves the subject: <what the work item is about, and the files that decide it>;

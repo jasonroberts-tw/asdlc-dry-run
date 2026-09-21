@@ -283,7 +283,7 @@ console.log('citation scanner selftest\n')
   ok('a history directory is exempt', historyReason('docs/retired/verify-layout.md') !== null)
   ok('a live file is not', historyReason('tools/journey/model.ts') === null)
 
-  // A DELIVERED-HANDOFF-PACKAGE EXEMPTION was asserted here on both sides, and D-30 removed it with
+  // A DELIVERED-HANDOFF-PACKAGE EXEMPTION was asserted here on both sides, and a later decision removed it with
   // the packages. `tools/citations/scan.ts` keeps the argument for why it existed, because the SHAPE
   // recurs the next time a node copies documents under new paths: committing slice 004's package
   // broke five long-standing citations elsewhere in the tree -- none of them touched -- because ~60
@@ -371,7 +371,7 @@ console.log('citation scanner selftest\n')
     }
   }
   // The floors are "more than a handful", not a count of the estate. The line-citation floor read
-  // `> 50` until D-33 deleted the slice specs, prompts and admissions that carried most of the
+  // `> 50` until a later decision deleted the prompts and records that carried most of the
   // repository's `<file>.md:NN` pointers, and the count has only fallen since. The current figure is whatever
   // `npm run citations:check` prints today and is deliberately not written here, where it would
   // drift like every other numeral. A floor a legitimate deletion can cross is a gate that fails

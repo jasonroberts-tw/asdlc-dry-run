@@ -53,10 +53,10 @@ const problems: Problem[] = []
 
 const tracked = trackedFiles()
 const trackedSet = new Set(tracked)
-// `isDeliveredPackage` FILTERED THIS UNTIL D-30, on both sides: a delivered handoff package copied
+// `isDeliveredPackage` FILTERED THIS UNTIL a later decision, on both sides: a delivered handoff package copied
 // ~60 documents under new paths, so a bare basename could resolve into a copy and five long-standing
-// citations elsewhere in the tree became ambiguous the moment slice 004's package landed. D-30
-// retired N-18 and deleted every package, so the whole roster is indexed again -- an exclusion
+// citations elsewhere in the tree became ambiguous the moment slice 004's package landed. a later decision
+// retired a node and deleted every package, so the whole roster is indexed again -- an exclusion
 // matching nothing is a hole in this gate rather than a saving, and a hand-made `handoff/` directory
 // would have inherited it silently.
 const byName = indexByName(tracked)

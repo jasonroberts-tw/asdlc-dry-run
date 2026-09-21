@@ -30,8 +30,8 @@ import { WORKFLOW, WORKFLOW_DIR, abs, optionalDependency, policy, suite } from '
 const pwsh = optionalDependency('pwsh', 'the host-facts writer and validator were not exercised')
 const t = suite('host-facts')
 const pol = policy()
-const writer = abs(`${WORKFLOW_DIR}tools/Write-CeHostFacts.ps1`)
-const validator = abs(`${WORKFLOW_DIR}tools/Test-CeHostFacts.ps1`)
+const writer = abs(`${WORKFLOW_DIR}tools/Write-HostFacts.ps1`)
+const validator = abs(`${WORKFLOW_DIR}tools/Test-HostFacts.ps1`)
 
 // The run directory must come from the writer's own derivation, not from this shell.
 const env = { ...process.env }

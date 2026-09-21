@@ -1,7 +1,6 @@
 # The whole "new machine setup" of README.md, baked into an image.
 #
-# Everything a person would otherwise do by hand -- Node, `bd`, the .NET SDK for the C# extractors,
-# `gh`, Claude Code and the beads plugin marketplace -- is a layer here
+# Everything a person would otherwise do by hand -- Node, `bd`, `gh`, Claude Code and the tracker's plugin marketplace -- is a layer here
 # rather than a devcontainer.json `feature` or `postCreateCommand`. That is deliberate: features
 # resolve at container-create time over the network and fail differently on every machine, and a
 # `postCreateCommand` re-runs on every rebuild. A layer is built once, cached, and identical for
@@ -71,25 +70,15 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
     && apt-get install -y --no-install-recommends gh \
     && rm -rf /var/lib/apt/lists/*
 
-# --- .NET 10 SDK --------------------------------------------------------------------------------
-# Builds the two C# projects in tools/ -- FormExtractor and SprocApiExtractor -- both net10.0, with
-# no global.json to pin anything else. (VendorProbe and FormHostCapture/semcheck were the other two
-# until D-36 deleted them on 2026-09-08, and with them the two pre-push jobs that had made the SDK
-# non-optional for a push.) README.md files this under "optional", which is true again for a push
-# and false for a re-extraction; it stays baked because the point of a devcontainer is that
-# "optional" never turns into an afternoon.
+# --- a language toolchain, if your project needs one ---------------------------------------------
+# NOTHING IS INSTALLED HERE BY DEFAULT. Add the SDK your own projects build with, and take it from
+# the base image's own archive where it carries one, so the layer costs no third-party repository.
 #
-# THE VERSION HAS TO TRACK THE CSPROJ FILES, and for a while it did not. 8c942d3 (#27) bumped every
-# target framework to net10.0 and updated README.md's setup step without touching this file, so the
-# image went on installing dotnet-sdk-8.0 and failed every C# build with NETSDK1045, "The current
-# .NET SDK does not support targeting .NET 10.0". Bead bom-5qb. 8.0 is NOT kept alongside: nothing
-# in this repository targets net8.0 any more.
-#
-# Ubuntu 24.04 carries 10.0 in its own archive (10.0.111-0ubuntu1~24.04.1, noble-updates/main), so
-# this still costs a layer and no third-party repository.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends dotnet-sdk-10.0 \
-    && rm -rf /var/lib/apt/lists/*
+# THE VERSION HAS TO TRACK WHAT THE PROJECTS TARGET, and that is the failure worth writing down
+# here: a change once bumped every project's target framework and updated the README's setup step
+# without touching this file, so the image went on installing the older SDK and failed every build
+# with a "does not support targeting" error. Pin ONE version, not two -- keeping the old one
+# alongside only hides the next mismatch.
 
 # --- global npm tools ---------------------------------------------------------------------------
 # `bd` is pinned to the database's version. Claude Code deliberately is not: it self-updates, so a
@@ -112,8 +101,8 @@ RUN git config --system --add safe.directory '*' \
 # mounted, so they cannot be layers. ENTRYPOINT is how they stay in the image anyway: the
 # devcontainer CLI replaces the container's *command* with a sleep, and leaves the image's
 # entrypoint alone.
-COPY entrypoint.sh /usr/local/bin/backoffice-entrypoint
-RUN chmod 0755 /usr/local/bin/backoffice-entrypoint
+COPY entrypoint.sh /usr/local/bin/workspace-entrypoint
+RUN chmod 0755 /usr/local/bin/workspace-entrypoint
 
 USER vscode
 
@@ -125,5 +114,5 @@ USER vscode
 # adds it if whatever ended up at ~/.claude does not have it.
 RUN claude plugin marketplace add gastownhall/beads || true
 
-ENTRYPOINT ["/usr/local/bin/backoffice-entrypoint"]
+ENTRYPOINT ["/usr/local/bin/workspace-entrypoint"]
 CMD ["sleep", "infinity"]

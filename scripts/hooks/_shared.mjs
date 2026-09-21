@@ -127,7 +127,7 @@ export function bannerCheckApplies(rel) {
  * KEPT AFTER THE GENERATOR WAS DELETED, and the message says so rather than naming a command that no
  * longer exists. Both the emitter and the `src/screens/` tree are gone, so nothing can legitimately
  * recreate one of these paths today; an agent writing one is reconstructing retired output by hand,
- * which is the one thing the slice-001 evidence rules forbid. Refusing with an explanation beats
+ * which is the one thing the evidence rules forbid. Refusing with an explanation beats
  * letting it land and beats a redirect to `npm run generate:screens`, which would now just fail.
  */
 const GENERATED_SCREEN =
@@ -138,7 +138,7 @@ function redirectForScreen(rel, ns, screen) {
     `${rel} is retired generated output. The screen generator that wrote it has been deleted, and`,
     'so has the `src/screens/` tree -- there is no command that regenerates this file.',
     '',
-    'Do not hand-write it back. Nothing in this repository builds a screen (D-32): a screen',
+    'Do not hand-write it back. Nothing in this repository builds a screen: a screen',
     'reconstructed by hand is evidence of nothing. Recover it from history if you need to read it:',
     `  git log --all --diff-filter=D -- ${rel}`,
     '',
@@ -146,7 +146,7 @@ function redirectForScreen(rel, ns, screen) {
     `  layout / controls / captions                     artifacts/forms/${ns}.${screen}.json`,
     '  a control type described wrong                   catalogue/controls/<Type>.md (the kernel; control-map.json is frozen under docs/retired/)',
     '  behaviour                                        derived by the migration research worker (migration/agents/) from the source; the',
-    '                                                   behaviour manifests and specs/screens/ went with node N-05 (D-33)',
+    '                                                   behaviour manifests went with the node that validated them',
   ].join('\n')
 }
 
@@ -172,7 +172,7 @@ const CATALOGUE_BASE = /^artifacts\/catalogue\/estate-catalogue\/references\/bas
 /**
  * `references/journeys/<EntryPoint>.md` under the published skill; group 1 is the entry point. Unlike
  * the two rows above there is NO hand-maintained source to redirect to: a journey page transcribes
- * N-12's routes.json and N-11's candidates.json (tools/catalogue/emit-journeys.mjs),
+ * the navigation model's routes and the journey candidates,
  * so the redirect names the node whose artifact carries the fact.
  */
 const CATALOGUE_JOURNEY =
@@ -228,19 +228,10 @@ export function generatedFileRedirect(rel) {
   const screen = GENERATED_SCREEN.exec(rel)
   if (screen) return redirectForScreen(rel, screen[1], screen[2])
 
-  // TWO REDIRECTS STOOD HERE and D-36 (2026-09-08) removed both with their emitters:
-  // `tools/ledger/correction-log.md` -> `npm run corrections:log` (the log is frozen under
-  // docs/retired/ now, and a redirect naming a command that no longer exists is worse than none,
-  // because the reader runs it), and `artifacts/design-system/{skin,skin-coverage,tokens}.json` ->
-  // `npm run skin:parse` (the token layer that moved here from `src/design-system/` in D-16; the
-  // parser and its outputs are deleted). Before them, the `artifacts/slices/<id>/throughput.md`
-  // and `generation-report.json` entries went with D-30.
-  // N-03's merged contract (`artifacts/api/contract/schema.graphql`) HAD A ROW HERE, and
-  // before that `artifacts/api/client/operations.d.ts` did, until D-23 retired node N-02. D-33
-  // retired N-03 with the SLICE kind: its one input was the admitted slices' bindings, so the
-  // union of zero slices was never going to be a file again, and the row went with the emitter
-  // (`scripts/merge-slice-schemas.mjs`). The corpus schemas under `artifacts/api/graphql/` are
-  // N-07's and were never claimed here -- every entry in this table is path-exact for that reason.
+  // REDIRECTS STOOD HERE and went with the emitters they named. A redirect naming a command that
+  // no longer exists is worse than none, because the reader runs it: when an emitter is retired,
+  // its row goes in the same change. Every entry in this table is path-exact for that reason --
+  // a row never claims an artifact that a different emitter owns.
   //
   // The catalogue's per-type control references (tools/catalogue/emit-controls.mjs).
   // Emitted from the HAND-MAINTAINED kernel file `catalogue/controls/<Simple>.md`, whose name is the
@@ -280,7 +271,7 @@ export function generatedFileRedirect(rel) {
     return redirect(
       rel,
       'by `npm run catalogue` (tools/catalogue/emit-journeys.mjs)',
-      `the node that measured it -- artifacts/navigation/routes.json (npm run navigation, node N-12, needs ../estate) for the route and menu binding of ${journey[1]}; artifacts/journeys/candidates.json (npm run journeys, node N-11) for its closure and marks. Nothing about a journey is authored in the catalogue`,
+      `the node that measured it -- the navigation model for the route and menu binding of ${journey[1]}, and the journey candidates for its closure and marks. Nothing about a journey is authored in the catalogue`,
       'npm run catalogue',
     )
   }
@@ -293,9 +284,9 @@ export function generatedFileRedirect(rel) {
       'npm run catalogue',
     )
   }
-  // Node N-14 (D-38). The whole tree is emitter-owned: the
+  // The node that reads run records. The whole tree is emitter-owned: the
   // records are written by the migration workflow's terminal step
-  // (migration/skills/migration-contract/tools/Write-CeRunOutcome.ps1) and normalised to
+  // (migration/skills/migration-contract/tools/Write-RunOutcome.ps1) and normalised to
   // canonical bytes by `npm run outcomes`, the comment and judgement files are what two harvest
   // scripts read back from the work tracker and from the judge, and everything else is derived from
   // those by `npm run outcomes`. A PATTERN over the root rather than path-exact rows, because the
@@ -306,7 +297,7 @@ export function generatedFileRedirect(rel) {
     return redirect(
       rel,
       'by `npm run outcomes` (tools/outcomes/), or harvested by `outcomes:comments` / `outcomes:judge`',
-      'the source it was written or derived from -- for a record, the migration workflow’s terminal step (migration/skills/migration-contract/tools/Write-CeRunOutcome.ps1 writes it, `npm run outcomes` normalises it; never edit the file by hand), tools/outcomes/*.ts or tools/outcomes/policy.json for a report, the the work tracker thread for a comment, tools/outcomes/judge-prompt.md for a judgement',
+      'the source it was written or derived from -- for a record, the migration workflow’s terminal step (migration/skills/migration-contract/tools/Write-RunOutcome.ps1 writes it, `npm run outcomes` normalises it; never edit the file by hand), tools/outcomes/*.ts or tools/outcomes/policy.json for a report, the the work tracker thread for a comment, tools/outcomes/judge-prompt.md for a judgement',
       'npm run outcomes',
     )
   }

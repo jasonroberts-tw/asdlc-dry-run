@@ -8,7 +8,7 @@
  *
  *   > **`estateHead` cannot detect the change that actually happened.** The pinned commit is
  *   > the same today as it was weeks ago. It did not move. What moved was
- *   > `artifacts/forms/**`, from 1,205 documents to 1,257.
+ *   > one input group, from 1,205 documents to 1,257.
  *
  * So the stamp is over CONTENT. The existing `estateHead` / `source` blocks are left exactly
  * where they are: they are cited in prose and read by `tools/portfolio/coverage.ts` and
@@ -156,7 +156,7 @@ export function computeInputs(node: PipelineNode, root: string = ROOT): Computed
  *
  * `tools/pipeline/graph.ts` used to be listed in `STAMP_SOURCES`, which made this a byte digest of
  * the entire 21-node manifest: appending one comment moved every stamped node's `generatorDigest`,
- * turning `pipeline:stale:check` red for N-08, N-15 and N-12 together, in `pre-push` and
+ * turning `pipeline:stale:check` red for a node, a node and a node together, in `pre-push` and
  * in CI, with the only printed remedy being a generator run CI cannot perform. See the note on
  * `STAMP_SOURCES`.
  *
@@ -227,7 +227,7 @@ export const computeGeneratorDigest = (node: PipelineNode, root: string = ROOT):
  *
  * `priorPath` names the file to read the stamp from, defaulting to the node's declared stamp path
  * under `root`. An emitter writing under an OUTPUT OVERRIDE passes the file it is about to overwrite
- * (N-08 under `ARCHETYPES_OUT`, `tools/archetypes/paths.ts`): the sticky timestamp has to be carried
+ * (a node under `ARCHETYPES_OUT`, `tools/archetypes/paths.ts`): the sticky timestamp has to be carried
  * forward from the output being replaced, or a scratch emit and the scratch `--check` a second later
  * differ on `generatedAtUtc` alone -- which is how `archetypes:selftest` found this.
  * In production the two paths are the same file, so nothing about the committed bytes moves.

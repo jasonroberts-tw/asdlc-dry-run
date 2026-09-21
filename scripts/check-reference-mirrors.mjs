@@ -8,7 +8,7 @@
  * contract": a `README.md` recording the pin, and a `MANIFEST.sha256` recording the bytes. Both
  * import READMEs then told a reader to re-hash and compare. Nothing did.
  *
- * (The read-only skill mirror the two paragraphs below describe was DELETED by D-34 on 2026-09-07,
+ * (The read-only skill mirror the two paragraphs below describe was DELETED by a later decision on 2026-09-07,
  * as a retired import nothing read; `reference/data/` is the one import the
  * gate walks today. The story stays because it is why the gate exists, and the deletion needed no
  * code change here: the import layout is discovered, not listed -- see below.)
@@ -40,12 +40,12 @@
  * It runs at `pre-push` and in `.github/workflows/verify.yml`, and CI is the run that matters: CI is
  * where the drift went unnoticed, and a hook alone is skipped by `--no-verify`.
  *
- * A SIXTH CHECK STOOD HERE UNTIL D-38 (2026-09-09) AND WAS REMOVED AS A CHECK THAT COULD NEVER RUN.
+ * A SIXTH CHECK STOOD HERE UNTIL a later decision (2026-09-09) AND WAS REMOVED AS A CHECK THAT COULD NEVER RUN.
  * Where the import's source REPOSITORY was on disk at the recorded pin, it re-read each manifest
  * row's blob with `git -C <sibling> cat-file blob <pin>:<path>` and compared, to catch a manifest cut
  * wrong at import time rather than a mirror drifted since; where the checkout was absent -- CI, and
  * every clone but the importer's -- it SKIPPED by name, exit 0. Its only possible subject was the
- * mirror D-34 deleted: `reference/data/`'s manifest header names a DATABASE under `Source :`, which
+ * mirror a later decision deleted: `reference/data/`'s manifest header names a DATABASE under `Source :`, which
  * has no pin and no blobs, so the check read nothing anywhere and printed "no repository source" on
  * every run. A gate that cannot fail is one people stop reading (`lefthook.yml`'s recurring
  * argument), and a skip message naming a checkout of a repository this one no longer references is
@@ -56,7 +56,7 @@
  * helper); resolve the sibling from the PRIMARY checkout via `git rev-parse --git-common-dir` (an
  * ancestor walk finds nothing from a linked worktree); and verify at the PIN, never at
  * the sibling's HEAD, so an ordinary pull cannot make the gate red. The working version is at
- * `git show <D-38 commit>^:scripts/check-reference-mirrors.mjs`.
+ * `git show <a later decision commit>^:scripts/check-reference-mirrors.mjs`.
  *
  * THE IMPORT LAYOUT IS DISCOVERED, NOT LISTED. There is no table of imports here to forget to
  * extend. Every directory under `reference/` is an import; its manifest's third column is a source
@@ -95,7 +95,7 @@ const sha256 = (buf) => createHash('sha256').update(buf).digest('hex')
  * `<sha256>  <bytes>  <source path>` rows, plus the header facts the rows are checked against.
  *
  * A repository-sourced import may also record `Source repo :` and `Pin :` in its header; nothing
- * here reads them since D-38 (the header above says what would). `data/`'s header records a
+ * here reads them since a later decision (the header above says what would). `data/`'s header records a
  * database and an export date instead, which is the unpinnable case `reference/README.md` describes.
  */
 function readManifest(path) {

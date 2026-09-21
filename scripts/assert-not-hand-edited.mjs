@@ -56,13 +56,12 @@ if (suspect.length === 0) process.exit(0)
  */
 const VERIFIERS = [
   // A `graphql:merge:check` row over `artifacts/api/contract/schema.graphql` STOOD HERE -- node
-  // N-03's, and before D-23 node N-02's as `generate:api-client:check` over
-  // `artifacts/api/client/operations.d.ts`. D-33 retired N-03 with the SLICE kind and deleted
+  // one node’s, and before that another’s, over a generated client. Both nodes were retired and
   // the contract file with its emitter; a verifier over a file nothing writes is a row that can never
   // fire.
   //
   // The correction log's row STOOD HERE (`corrections:log` over `tools/ledger/correction-log.md`),
-  // narrowed by D-30 from a `throughput` row over two reports and deleted by D-36 (2026-09-08) with
+  // narrowed from a `throughput` row over two reports, and deleted with
   // the emitter: the rendered log is frozen under `docs/retired/` and is nobody's build
   // product now, so there is nothing to re-derive and no row.
   // The catalogue. `catalogue:check` rebuilds the whole output root and
@@ -77,9 +76,9 @@ const VERIFIERS = [
     owns: (rel) => rel.startsWith('artifacts/catalogue/'),
     names: (out) => [...out.matchAll(/^\s+(artifacts\/catalogue\/\S+)/gm)].map((m) => m[1]),
   },
-  // Node N-14 (D-38). The records under
+  // The node that reads run records. The records under
   // `artifacts/outcomes/records/` are written by the migration workflow's terminal step
-  // (`migration/skills/migration-contract/tools/Write-CeRunOutcome.ps1`) and normalised to
+  // (`migration/skills/migration-contract/tools/Write-RunOutcome.ps1`) and normalised to
   // canonical bytes by `npm run outcomes`; everything else under the root is derived from them.
   // `outcomes:check` is still the verifier: it re-validates every record against the one schema under
   // `migration/`, re-serialises it, rebuilds every report and byte-compares the whole tree, printing
