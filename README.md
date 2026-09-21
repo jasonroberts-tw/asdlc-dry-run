@@ -150,6 +150,7 @@ holds platform-native binaries. Use one clone per platform.
 | Have agents work the ready issues in parallel | the `fan-out-work` agent | One fresh agent per lane, each in its own worktree, integrated on the dispatcher's branch. |
 | Research a topic before changing anything | the `explore` skill | Assumptions and guesses first, then an inventory of evidence with no recommendations. |
 | Draft what a person must do for an issue an agent cannot finish | the `human-plan` skill | |
+| Get the last reply, or one term, explained in plainer terms | `/eli5 [term or topic]` | Supplies the background the reply assumed; simplifies the wording, never the facts, and changes nothing. |
 | Add, rename or remove an npm script | the `add-npm-script` skill | It keeps § The npm scripts below, the hook runner and CI in step. |
 | Retire a file | the `retire-asset` skill | A register decision with a checklist, not a tidy-up (`docs/retired/README.md`). |
 | Start a supervised workflow run | `/dry-run <item>` | Only a person can; the skill cannot be invoked by a model. |
