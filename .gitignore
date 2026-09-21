@@ -30,3 +30,13 @@ lefthook-local.yml
 # The starter kit's bootstrap state. Delete this entry with KIT-CHECKLIST.md once the checklist is
 # done.
 .kit/
+
+.beads/dolt/
+.beads/embeddeddolt/
+.beads/proxieddb/
+.beads/backup/
+.beads/.local_version
+.beads/.beads-credential-key
+.beads/.env
+.beads/*.lock
+*.gate.lock*
